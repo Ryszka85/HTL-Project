@@ -6,6 +6,7 @@ public enum StandardMessages {
 
     private String msg;
     StandardMessages(String msg) {
+        System.out.println("FUCK OFFF");
         this.msg = msg;
     }
 
