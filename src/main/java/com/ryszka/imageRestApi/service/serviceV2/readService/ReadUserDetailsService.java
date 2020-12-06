@@ -6,6 +6,7 @@ import com.ryszka.imageRestApi.errorHandling.EntityNotFoundException;
 import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
 import com.ryszka.imageRestApi.persistenceEntities.ImageEntity;
 import com.ryszka.imageRestApi.persistenceEntities.SessionEntity;
+import com.ryszka.imageRestApi.repository.UserRepository;
 import com.ryszka.imageRestApi.util.mapper.mapStrategies.ImageEntitiesToImageRespModels;
 import com.ryszka.imageRestApi.util.mapper.mapStrategies.UserEntityToImageRespModels;
 import com.ryszka.imageRestApi.viewModels.response.UserDetailsResponseModel;
@@ -31,12 +32,13 @@ public class ReadUserDetailsService {
             LoggerFactory.getLogger(ReadUserDetailsService.class);
     private final UserDAO userDAO;
     private final SessionDAO sessionDAO;
+    private UserRepository userRepository;
 
-    public ReadUserDetailsService(UserDAO userDAO, SessionDAO sessionDAO) {
+    public ReadUserDetailsService(UserDAO userDAO, SessionDAO sessionDAO, UserRepository userRepository) {
         this.userDAO = userDAO;
         this.sessionDAO = sessionDAO;
+        this.userRepository = userRepository;
     }
-
 
     public UserDetailsResponseModel getUserDetailsByUserId(String userId) {
         logger.info("Attempting [ getUserDetailsByUserId.. ]");
@@ -49,19 +51,23 @@ public class ReadUserDetailsService {
         System.out.println(userEntity.getEmail());
         return ObjectMapper.mapByStrategy(userEntity, new UserEntityToUserDetailsResponseModel());
 
-        }
+    }
 
+    public List<UserDetailsResponseModel> getUserDetailsByUserName(String userName) {
+        return userRepository.findByUsername(userName)
+                .stream()
+                .map(userEntity -> ObjectMapper.mapByStrategy(userEntity, new UserEntityToUserDetailsResponseModel()))
+                .collect(Collectors.toList());
+    }
 
     public UserDetailsResponseModel getUserDetailsByUID(String userId, HttpServletRequest request) {
         logger.info("Attempting [ getUserDetailsByUID.. ]");
-        System.out.println(userId);
         Optional<UserEntity> optUserEntity = userDAO.findUserEntityByUserId(userId);
         if (optUserEntity.isEmpty())
             throw new EntityNotFoundException(
                     ErrorMessages.NOT_FOUND_BY_EID.getMessage());
         List<UserImageViewModel> likes = new ArrayList<>();
         UserEntity userEntity = optUserEntity.get();
-        System.out.println(userEntity.getEmail());
         UserDetailsResponseModel responseModel =
                 ObjectMapper.mapByStrategy(userEntity, new UserEntityToUserDetailsResponseModel());
 
@@ -72,9 +78,9 @@ public class ReadUserDetailsService {
             // check if user is owner and show private and public images
             if (bySessionIdOpt.isPresent() && bySessionIdOpt.get().getPrincipal() != null &&
                     bySessionIdOpt.get().getPrincipal().equals(userEntity.getEmail())) {
-                    logger.info("User is principal..Preparing user images");
-                    userImages = ObjectMapper.mapByStrategy(userEntity, new UserEntityToImageRespModels());
-                    likes = ObjectMapper.mapByStrategy(userEntity.getLikes(), new ImageEntitiesToImageRespModels());
+                logger.info("User is principal..Preparing user images");
+                userImages = ObjectMapper.mapByStrategy(userEntity, new UserEntityToImageRespModels());
+                likes = ObjectMapper.mapByStrategy(userEntity.getLikes(), new ImageEntitiesToImageRespModels());
             } else {
                 logger.info("User is not principal..Preparing only public user images");
                 // don t show public images

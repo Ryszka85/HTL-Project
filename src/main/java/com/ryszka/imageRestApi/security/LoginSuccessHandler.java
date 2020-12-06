@@ -30,6 +30,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         String username = ((User) authentication.getPrincipal()).getUsername();
         ReadUserDetailsService UserAuth = (ReadUserDetailsService) AppContext.getBean("readUserDetailsService");
         UserDetailsResponseModel loggedInUserResponse = UserAuth.findUserByEmail(username);
+        loggedInUserResponse.setThirdPartyLogin(false);
         response.addHeader("UserId", loggedInUserResponse.getUserId());
         response.setStatus(HttpStatus.OK.value());
         mapper.writeValue(response.getWriter(), loggedInUserResponse);

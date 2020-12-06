@@ -149,7 +149,7 @@ public class ReadUserLibraryService {
 
 
                 String imgPath = userEntity.getUserId() + "/" + response.getName();
-                String path = isMobile ? "gallery/" + imgPath : "downloadView/" + imgPath;
+                String path = "downloadView/" + imgPath;
                 logger.info("Generating path for request : {}", path);
 
                 System.out.println(path);

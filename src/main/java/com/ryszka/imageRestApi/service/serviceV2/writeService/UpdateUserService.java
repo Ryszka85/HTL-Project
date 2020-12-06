@@ -16,6 +16,7 @@ import com.ryszka.imageRestApi.security.AppConfigProperties;
 import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.util.ThumbnailProducer;
 import com.ryszka.imageRestApi.util.imageScaler.*;
+import com.ryszka.imageRestApi.viewModels.request.UpdateUserDetailsRequest;
 import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,23 @@ public class UpdateUserService {
         this.imageDAO = imageDAO;
         this.storageConfig = storageConfig;
         this.googleCloudRepository = googleCloudRepository;
+    }
+
+
+    public void changeUserDetails(UpdateUserDetailsRequest request) {
+        UserEntity userEntity = userDAO.findUserEntityByUserId(request.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        ErrorMessages.NOT_FOUND_BY_EID.getMessage()));
+        userEntity.setEmail(getNotNullPropertyValue(request.getEmail(), userEntity.getEmail()));
+        userEntity.setFirstName(getNotNullPropertyValue(request.getFirstName(), userEntity.getFirstName()));
+        userEntity.setLastName(getNotNullPropertyValue(request.getLastName(), userEntity.getLastName()));
+        userEntity.setPassword(getNotNullPropertyValue(request.getPassword(), userEntity.getPassword()));
+        userEntity.setUsername(getNotNullPropertyValue(request.getUsername(), userEntity.getUsername()));
+        userDAO.saveUserEntity(userEntity);
+    }
+
+    private String getNotNullPropertyValue(String when, String or) {
+        return when != null ? when : or;
     }
 
 

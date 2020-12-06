@@ -8,6 +8,8 @@ import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
 import com.ryszka.imageRestApi.persistenceEntities.ImageEntity;
 import com.ryszka.imageRestApi.persistenceEntities.TagEntity;
 import com.ryszka.imageRestApi.persistenceEntities.UserEntity;
+import com.ryszka.imageRestApi.repository.ImageRepository;
+import com.ryszka.imageRestApi.repository.TagRepository;
 import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.service.dto.TagDTO;
 import com.ryszka.imageRestApi.viewModels.response.UserImageViewModel;
@@ -25,13 +27,17 @@ public class ModifyImageFromLibraryService {
     private TagDAO tagDAO;
     private ImageDAO imageDAO;
     private UserDAO userDAO;
+    private ImageRepository imageRepository;
+    private TagRepository tagRepository;
     private final Logger logger =
             LoggerFactory.getLogger(ModifyImageFromLibraryService.class);
 
-    public ModifyImageFromLibraryService(TagDAO tagDAO, ImageDAO imageDAO, UserDAO userDAO) {
+    public ModifyImageFromLibraryService(TagDAO tagDAO, ImageDAO imageDAO, UserDAO userDAO, ImageRepository imageRepository, TagRepository tagRepository) {
         this.tagDAO = tagDAO;
         this.imageDAO = imageDAO;
         this.userDAO = userDAO;
+        this.imageRepository = imageRepository;
+        this.tagRepository = tagRepository;
     }
 
     public void changeImageDetails(UserImageViewModel updateReq) {
@@ -49,8 +55,16 @@ public class ModifyImageFromLibraryService {
 
     @Transactional
     public void deleteImageFromLibrary(UserImageViewModel request) {
+
         UserEntity userEntity = getUserEntityOrThrow(request.getUser().getUserId());
-        this.imageDAO.deleteImageByImageIdAndUserEntity(request.getImageId(), userEntity);
+        Optional<ImageEntity> imageByImageId = this.imageDAO.getImageByImageId(request.getImageId());
+        ImageEntity imageEntity = imageByImageId.orElseThrow(() -> new EntityNotFoundException("image could not be found"));
+
+        imageEntity.getTags().clear();
+        imageEntity.getUserLikesList().clear();
+        imageRepository.save(imageEntity);
+        imageRepository.delete(imageEntity);
+        /*this.imageDAO.deleteImageByImageIdAndUserEntity(request.getImageId(), userEntity);*/
     }
 
     public void setTags(ImageDTO imageDTO) {

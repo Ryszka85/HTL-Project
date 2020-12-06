@@ -36,6 +36,7 @@ public class GoogleSuccessHandler implements AuthenticationSuccessHandler {
 
         ReadUserDetailsService UserAuth = (ReadUserDetailsService) AppContext.getBean("readUserDetailsService");
         UserDetailsResponseModel loggedInUserResponse = UserAuth.findUserByEmail(email);
+        loggedInUserResponse.setThirdPartyLogin(true);
         response.addHeader("UserId", loggedInUserResponse.getUserId());
         objectMapper.writeValue(response.getWriter(), loggedInUserResponse);
         response.setStatus(HttpStatus.OK.value());

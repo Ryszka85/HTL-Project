@@ -18,7 +18,7 @@ public class TagEntity implements Serializable {
     @Column(name = "tag_id")
     private String tagId;
     private String tag;
-    @ManyToMany(mappedBy = "tags", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "tags",cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
     private List<ImageEntity> imageEntities;
 
     public TagEntity() {

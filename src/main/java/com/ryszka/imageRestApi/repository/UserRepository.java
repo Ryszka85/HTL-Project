@@ -10,7 +10,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Transactional
@@ -26,6 +28,9 @@ public interface UserRepository extends CrudRepository<UserEntity, Integer> {
 
     UserEntity getByEmail(String email);
 
+
+    @Query(value = DBQueryStatements.likeUserName, nativeQuery = true)
+    List<UserEntity> findByUsername(@Param("username") String username);
 
     List<UserEntity> findByEmailLike(String email);
 

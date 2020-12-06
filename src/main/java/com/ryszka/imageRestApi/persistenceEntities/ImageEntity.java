@@ -24,7 +24,7 @@ public class ImageEntity implements Serializable {
     @JoinColumn(name = "id_user")
     @JsonBackReference
     private UserEntity userEntity;
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE},fetch = FetchType.LAZY)
     @JoinTable(name = "tagged_image",
             joinColumns = {@JoinColumn(name = "id_image")},
             inverseJoinColumns = {@JoinColumn(name = "id_tag")})

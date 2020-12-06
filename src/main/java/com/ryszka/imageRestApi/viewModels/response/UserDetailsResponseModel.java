@@ -11,9 +11,21 @@ public class UserDetailsResponseModel implements Serializable {
     private String firstName, lastName, userId, email, profileImgPath, username;
     private List<UserImageViewModel> images;
     private List<UserImageViewModel> likes;
+    private boolean thirdPartyLogin;
 
     public UserDetailsResponseModel() {
     }
+
+
+    public UserDetailsResponseModel(boolean thirdPartyLogin, String firstName, String lastName,
+                                    String userId, String email,
+                                    String profileImgPath, String username,
+                                    List<UserImageViewModel> images,
+                                    List<UserImageViewModel> likes) {
+        this(firstName, lastName, userId, email, profileImgPath, username, images, likes);
+        this.thirdPartyLogin = thirdPartyLogin;
+    }
+
 
     public UserDetailsResponseModel(String firstName, String lastName,
                                     String userId, String email,
@@ -64,6 +76,14 @@ public class UserDetailsResponseModel implements Serializable {
         return userEntity.getProfilePath() != null ?
                 AppConfigProperties.FILE_PATH + userEntity.getProfilePath() :
                 null;
+    }
+
+    public boolean isThirdPartyLogin() {
+        return thirdPartyLogin;
+    }
+
+    public void setThirdPartyLogin(boolean thirdPartyLogin) {
+        this.thirdPartyLogin = thirdPartyLogin;
     }
 
     public List<UserImageViewModel> getImages() {

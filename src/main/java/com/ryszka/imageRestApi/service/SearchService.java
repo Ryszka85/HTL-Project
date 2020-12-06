@@ -39,10 +39,18 @@ public class SearchService {
     }
 
     public List<UserDetailsResponseModel> searchUsers(String email) {
+        System.out.println("hallo??");
         logger.info("Preparing search by user email ..");
         List<UserDetailsResponseModel> allByEmail = userDetailsService.findAllByEmail(email);
         return allByEmail.stream()
                 .map(byEmail -> userDetailsService.getUserDetailsByUserId(byEmail.getUserId()))
                 .collect(Collectors.toList());
     }
+
+
+    public List<UserDetailsResponseModel> searchByUserName(String username) {
+        return userDetailsService.getUserDetailsByUserName(username);
+
+    }
+
 }

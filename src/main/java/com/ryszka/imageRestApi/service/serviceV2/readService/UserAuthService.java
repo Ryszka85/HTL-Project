@@ -41,8 +41,10 @@ public class UserAuthService implements UserDetailsService {
         UserEntity userEntity = userDAO.findByEmail(sessionEntity.getPrincipal())
                 .orElseThrow(() -> new EntityNotFoundException(
                         ErrorMessages.NOT_FOUND_BY_USERNAME.getMessage()));
-        return ObjectMapper.mapByStrategy(userEntity,
+        UserDetailsResponseModel userDetailsResponseModel = ObjectMapper.mapByStrategy(userEntity,
                 new UserEntityToUserDetailsResponseModel());
+        userDetailsResponseModel.setThirdPartyLogin(userEntity.getLoginType().equals("GOOGLE"));
+        return userDetailsResponseModel;
     }
 
     @Override

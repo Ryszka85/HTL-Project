@@ -2,6 +2,7 @@ package com.ryszka.imageRestApi.controller.writeController;
 
 import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.service.serviceV2.writeService.UpdateUserService;
+import com.ryszka.imageRestApi.viewModels.request.UpdateUserDetailsRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,5 +26,11 @@ public class UserUpdateController {
     public void addUserLike(@PathVariable String imageId,
                             @PathVariable String userId) {
         updateUserService.addUserLike(imageId, userId);
+    }
+
+    @PostMapping(value = "/email")
+    public void changeUserEmail(@RequestBody UpdateUserDetailsRequest request) {
+        /*updateUserService.addUserLike(imageId, userId);*/
+        updateUserService.changeUserDetails(request);
     }
 }
