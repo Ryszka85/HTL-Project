@@ -1,7 +1,13 @@
 package com.ryszka.imageRestApi.controller.readController;
 
+import com.google.cloud.Identity;
+import com.google.cloud.Policy;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.StorageRoles;
 import com.ryszka.imageRestApi.errorHandling.EntityNotFoundException;
 import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
+import com.ryszka.imageRestApi.security.AppConfigProperties;
 import com.ryszka.imageRestApi.service.dto.TagDTO;
 import com.ryszka.imageRestApi.viewModels.request.GetImagesByTagRequest;
 import com.ryszka.imageRestApi.viewModels.response.UserImageViewModel;
@@ -36,7 +42,6 @@ public class ReadFromLibraryController {
     @PostMapping(value = "tags")
     public List<UserImageViewModel> getImageByTagIDs(@RequestBody testStuff t,
                                                            HttpServletRequest request) {
-        System.out.println("foo");
         List<UserImageViewModel> relatedImagesByTagIds = readService
                 .getRelatedImagesByTagIds(
                         t.getTags()
@@ -62,6 +67,8 @@ public class ReadFromLibraryController {
 
     @PostMapping(value = "tag/")
     public ResponseEntity<Optional<List<UserImageViewModel>>> test(@RequestBody GetImagesByTagRequest request) {
+        System.out.println("Hallo");
+        System.out.println("foo");
         Optional<List<UserImageViewModel>> output = this.readService
                 .getImagesByTagNamePageable(request, 0);
         return validateQueryAndGetResponse(output,

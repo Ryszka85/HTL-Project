@@ -8,8 +8,41 @@ public class AddToLibraryRequest implements Serializable {
     private static final long serialVersionUID = 2303659391909273522L;
     private MultipartFile file, galleryFile, downloadFile;
     private String userId, urlReference, isPublic;
+    private int offsetXGallery, offsetYGallery, offsetXDownload, offsetYDownload;
 
     public AddToLibraryRequest() {
+    }
+
+    public int getOffsetXGallery() {
+        return offsetXGallery;
+    }
+
+    public void setOffsetXGallery(int offsetXGallery) {
+        this.offsetXGallery = offsetXGallery;
+    }
+
+    public int getOffsetYGallery() {
+        return offsetYGallery;
+    }
+
+    public void setOffsetYGallery(int offsetYGallery) {
+        this.offsetYGallery = offsetYGallery;
+    }
+
+    public int getOffsetXDownload() {
+        return offsetXDownload;
+    }
+
+    public void setOffsetXDownload(int offsetXDownload) {
+        this.offsetXDownload = offsetXDownload;
+    }
+
+    public int getOffsetYDownload() {
+        return offsetYDownload;
+    }
+
+    public void setOffsetYDownload(int offsetYDownload) {
+        this.offsetYDownload = offsetYDownload;
     }
 
     public MultipartFile getDownloadFile() {

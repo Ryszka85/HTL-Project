@@ -1,5 +1,6 @@
 package com.ryszka.imageRestApi.service.serviceV2.writeService;
 
+import com.google.api.client.util.IOUtils;
 import com.ryszka.imageRestApi.config.FireBaseStorageConfig;
 import com.ryszka.imageRestApi.dao.ImageDAO;
 import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
@@ -9,10 +10,7 @@ import com.ryszka.imageRestApi.repository.GoogleCloudRepository;
 import com.ryszka.imageRestApi.security.AppPossibleLibraryResolutions;
 import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.repository.ImageRepository;
-import com.ryszka.imageRestApi.util.imageScaler.ImageResizer;
-import com.ryszka.imageRestApi.util.imageScaler.ResizeDownByHeightForDownload;
-import com.ryszka.imageRestApi.util.imageScaler.ResizeDownByWidthForDownload;
-import com.ryszka.imageRestApi.util.imageScaler.ResizeDownForGallery;
+import com.ryszka.imageRestApi.util.imageScaler.*;
 import com.ryszka.imageRestApi.util.mapper.ObjectMapper;
 import com.ryszka.imageRestApi.util.mapper.mapStrategies.ImageDtoToImageEntity;
 import org.slf4j.Logger;
@@ -87,6 +85,7 @@ public class DatabaseAndFTPStorageService {
                         new FtpPersistenceEntity(imageDTO.getPath() + "/" + imageDTO.getName(), imageDTO.getInputStream())
                 );*/
                 /*imageScaler.scaleDown(imageDTO.getInputStream())*/
+
                 List<ImageDetailsEntity> imageDetailsEntityList = new ArrayList<>();
 
                 BufferedImage bi = ImageIO.read(imageDTO.getInputStream());
@@ -100,7 +99,9 @@ public class DatabaseAndFTPStorageService {
 
                 cloudRepository.storeImage("original/" + imageDTO.getPath(), imageDTO.getName(), imageDTO.getContent());
 
-                ImageResizer galleryScaler = new ResizeDownForGallery(imageDTO.getContentGalleryFile());
+                /*ImageResizer galleryScaler = new ResizeDownForGallery(imageDTO.getContentGalleryFile());*/
+                byte[] bytes = imageDTO.getContent();
+                ImageResizer galleryScaler = new ResizeGalleryImage(bi.getWidth(), bi.getHeight(), bytes);
                 byte[] galleryContent = galleryScaler.resize();
                 cloudRepository.storeImage(
                         "gallery" + "/" + imageDTO.getPath(),

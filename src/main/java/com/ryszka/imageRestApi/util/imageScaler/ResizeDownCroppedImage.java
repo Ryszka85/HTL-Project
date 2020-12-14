@@ -31,7 +31,7 @@ public class ResizeDownCroppedImage implements ImageResizer {
                     originalImg.getWidth() + " x " + originalImg.getHeight() + " at offset X : " +
                     croppedImgValues.getOffsetX() + ", offset Y : " + croppedImgValues.getOffsetY() +
                     " to size " + croppedImgValues.getSubImageWidth() + " x " + croppedImgValues.getSubImageHeight());
-
+            
             BufferedImage croppedImage = originalImg.getSubimage(croppedImgValues.getOffsetX(), croppedImgValues.getOffsetY(),
                     croppedImgValues.getSubImageWidth(), croppedImgValues.getSubImageHeight());
             logger.info("Finished cropping image.");

@@ -61,7 +61,14 @@ public class ImageDTO {
             e.printStackTrace();
         }
         this.path = userId;
-        this.name = file.getOriginalFilename();
+        String originalFilename = file.getOriginalFilename();
+        assert originalFilename != null;
+        int index = originalFilename.lastIndexOf(".");
+        String substring = originalFilename.substring(0, index);
+        String substring1 = originalFilename.substring(index);
+        this.name = substring +
+                System.currentTimeMillis() +
+                substring1;
     }
 
     public ImageDTO(UserEntity userEntity, List<ImageEntity> imageEntities) {

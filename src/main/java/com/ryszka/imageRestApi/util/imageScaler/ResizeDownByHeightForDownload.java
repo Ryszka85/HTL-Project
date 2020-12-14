@@ -13,8 +13,8 @@ import java.io.IOException;
 public class ResizeDownByHeightForDownload implements ImageResizer {
     private final Logger logger =
             LoggerFactory.getLogger(ResizeDownByWidthForDownload.class);
-    private byte[] content;
-    private int height;
+    private final byte[] content;
+    private final int height;
 
     public ResizeDownByHeightForDownload(byte[] content, int height) {
         this.content = content;
@@ -35,7 +35,7 @@ public class ResizeDownByHeightForDownload implements ImageResizer {
                             .keepAspectRatio(true)
                             .outputFormat("jpg")
                             .toOutputStream(bis);
-                    logger.info("Finished scaling image " + newWidth + "x" + height);
+                    logger.info("Finished resizing image " + newWidth + "x" + height);
                     return bis.toByteArray();
                 } catch (IOException e) {
                     e.printStackTrace();

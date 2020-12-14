@@ -56,6 +56,7 @@ public class ImageDownloadController {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.NOT_FOUND_BY_EID.getMessage()));
         String originalFilePath = "original/" + imageEntity.getUserEntity().getUserId() + "/" + imageEntity.getName();
         BlobId blobId = BlobId.of(AppConfigProperties.BUCKET_NAME, originalFilePath);
+        System.out.println(fireBaseStorageConfig.initAndGetStorage() != null);
         Storage storage = fireBaseStorageConfig.initAndGetStorage();
         byte[] content = storage.get(blobId).getContent();
         imageEntity.setDownloaded(imageEntity.getDownloaded() + 1);

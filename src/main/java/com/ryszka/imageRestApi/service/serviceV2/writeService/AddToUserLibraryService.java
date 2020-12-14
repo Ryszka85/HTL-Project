@@ -1,5 +1,10 @@
 package com.ryszka.imageRestApi.service.serviceV2.writeService;
 
+import com.google.cloud.Identity;
+import com.google.cloud.Policy;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.StorageRoles;
 import com.ryszka.imageRestApi.dao.UserDAO;
 import com.ryszka.imageRestApi.errorHandling.EntityNotFoundException;
 import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
@@ -35,6 +40,8 @@ public class AddToUserLibraryService {
                 new EntityNotFoundException(
                         ErrorMessages.NOT_FOUND_BY_EID.getMessage()));
         imageDTO.setUserEntity(userEntity);
+
         storage.storeToDbAndFTPInTransaction(imageDTO);
+
     }
 }
