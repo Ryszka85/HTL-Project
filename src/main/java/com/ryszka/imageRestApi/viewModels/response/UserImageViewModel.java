@@ -8,7 +8,7 @@ import java.util.List;
 
 public class UserImageViewModel implements Serializable {
     private static final long serialVersionUID = 3148099477137315634L;
-    private String name, link, imageId, linkReference;
+    private String name, link, imageId, linkReference, originalImgPath;
     private UserDetailsResponseModel user;
     private List<TagDTO> tags;
     /*private List<UserImageViewModel> likes;*/
@@ -30,6 +30,25 @@ public class UserImageViewModel implements Serializable {
         this.tags = tags;
         this.likes = likes;
     }*/
+
+
+
+    public UserImageViewModel(String name,
+                              String link,
+                              String imageId,
+                              UserDetailsResponseModel user,
+                              List<TagDTO> tags,
+                              String linkReference,
+                              boolean isPublic,
+                              int liked,
+                              int downloaded,
+                              List<ImageDetailViewModel> imageDetails,
+                              Date uploadDate,
+                              String originalImgPath) {
+        this(name, link, imageId, user, tags, linkReference, isPublic, liked, downloaded, imageDetails, uploadDate);
+        this.originalImgPath = originalImgPath;
+
+    }
 
 
     public UserImageViewModel(String name,
@@ -85,6 +104,14 @@ public class UserImageViewModel implements Serializable {
         this.imageId = imageId;
         this.user = user;
         this.tags = tags;
+    }
+
+    public String getOriginalImgPath() {
+        return originalImgPath;
+    }
+
+    public void setOriginalImgPath(String originalImgPath) {
+        this.originalImgPath = originalImgPath;
     }
 
     public List<ImageDetailViewModel> getImageDetails() {

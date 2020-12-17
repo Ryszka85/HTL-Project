@@ -23,6 +23,9 @@ public class ImageEntityToImageRespModel implements MapStrategy<ImageEntity, Use
         String fileAccessLink =
                 PathGenerator.generateGalleryFileAccessLink(userEntity.getUserId() + "/" + source.getName());
 
+        String originalImgPath = PathGenerator.generateOriginalImgFileAccessLink(
+                userEntity.getUserId() + "/" + source.getName());
+
         List<ImageDetailViewModel> details = source.getImageDetailsEntities()
                 .stream()
                 .map(detail -> new ImageDetailViewModel(detail.getType(), detail.getWidth(), detail.getHeight(), detail.getSize()))
@@ -40,7 +43,8 @@ public class ImageEntityToImageRespModel implements MapStrategy<ImageEntity, Use
                 source.getUserLikesList().size(),
                 source.getDownloaded(),
                 details,
-                source.getUploadDate()
+                source.getUploadDate(),
+                originalImgPath
 
         );
     }
