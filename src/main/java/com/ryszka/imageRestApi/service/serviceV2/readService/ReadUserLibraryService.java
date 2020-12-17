@@ -145,7 +145,6 @@ public class ReadUserLibraryService {
 
                 int isMobileHeaderVal = Integer.parseInt(servletRequest.getHeader("isMobile"));
                 boolean isMobile = isMobileHeaderVal == 1;
-                System.out.println("Is frontend mobile : " + isMobile);
 
 
                 String imgPath = userEntity.getUserId() + "/" + response.getName();
