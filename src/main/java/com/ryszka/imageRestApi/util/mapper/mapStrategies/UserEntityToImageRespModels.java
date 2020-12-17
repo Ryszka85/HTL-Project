@@ -22,6 +22,9 @@ public class UserEntityToImageRespModels implements MapStrategy<UserEntity, List
                     String fileAccessLink = PathGenerator.generateGalleryFileAccessLink(
                             imageEntity.getPath() + "/" + imageEntity.getName());
 
+                    String originalImgPath = PathGenerator.generateOriginalImgFileAccessLink(
+                            imageEntity.getPath() + "/" + imageEntity.getName());
+
                     UserDetailsResponseModel owner = ObjectMapper.mapByStrategy(source,
                             new UserEntityToUserDetailsResponseModel());
 
@@ -45,7 +48,8 @@ public class UserEntityToImageRespModels implements MapStrategy<UserEntity, List
                             imageEntity.getUserLikesList().size(),
                             imageEntity.getDownloaded(),
                             details,
-                            imageEntity.getUploadDate());
+                            imageEntity.getUploadDate(),
+                            originalImgPath);
                 })
                 .collect(Collectors.toList());
     }

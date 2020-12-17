@@ -56,8 +56,8 @@ public class ResizeGalleryImage implements ImageResizer{
         for (float f = 0.1f; f <= 1; f += adder) {
             float widthTimesFac = height > width ? width * f : height * f;
             System.out.println(f / 10);
-            if (widthTimesFac >= 500) {
-                if (widthTimesFac <= 600) {
+            if (widthTimesFac >= 600) {
+                if (widthTimesFac <= 700) {
                     return Map.of("X", (int) (width * f), "Y", (int) (height * f));
                 } else {
                     f /= 10;

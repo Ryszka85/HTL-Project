@@ -14,4 +14,11 @@ public class PathGenerator {
                 AppConfigProperties.FILE_PATH + "gallery/"  + path :
                 null;
     }
+
+
+    public static String generateOriginalImgFileAccessLink(String path) {
+        return path != null ?
+                AppConfigProperties.FILE_PATH + "original/"  + path :
+                null;
+    }
 }
