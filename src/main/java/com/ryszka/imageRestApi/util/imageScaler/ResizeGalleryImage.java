@@ -47,7 +47,7 @@ public class ResizeGalleryImage implements ImageResizer{
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        } 
         return new byte[0];
     }
 
