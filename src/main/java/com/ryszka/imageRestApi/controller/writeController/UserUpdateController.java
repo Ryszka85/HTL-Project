@@ -2,7 +2,9 @@ package com.ryszka.imageRestApi.controller.writeController;
 
 import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.service.serviceV2.writeService.UpdateUserService;
+import com.ryszka.imageRestApi.viewModels.request.ChangeUserPasswordRequest;
 import com.ryszka.imageRestApi.viewModels.request.UpdateUserDetailsRequest;
+import com.ryszka.imageRestApi.viewModels.response.ChangePasswordResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,5 +34,12 @@ public class UserUpdateController {
     public void changeUserEmail(@RequestBody UpdateUserDetailsRequest request) {
         /*updateUserService.addUserLike(imageId, userId);*/
         updateUserService.changeUserDetails(request);
+    }
+
+    @PostMapping(value = "/password")
+    public ChangePasswordResponse changeUserPassword(@RequestBody ChangeUserPasswordRequest request) {
+        /*updateUserService.addUserLike(imageId, userId);*/
+        return updateUserService.changeUserPassword(request);
+        /*updateUserService.changeUserDetails(request);*/
     }
 }
