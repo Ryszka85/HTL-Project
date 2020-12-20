@@ -16,10 +16,13 @@ import com.ryszka.imageRestApi.security.AppConfigProperties;
 import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.util.ThumbnailProducer;
 import com.ryszka.imageRestApi.util.imageScaler.*;
+import com.ryszka.imageRestApi.viewModels.request.ChangeUserPasswordRequest;
 import com.ryszka.imageRestApi.viewModels.request.UpdateUserDetailsRequest;
+import com.ryszka.imageRestApi.viewModels.response.ChangePasswordResponse;
 import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -38,15 +41,51 @@ public class UpdateUserService {
     private final ImageDAO imageDAO;
     private final FireBaseStorageConfig storageConfig;
     private final GoogleCloudRepository googleCloudRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UpdateUserService(TransactionTemplate transactionTemplate, UserDAO userDAO, ImageDAO imageDAO, FireBaseStorageConfig storageConfig, GoogleCloudRepository googleCloudRepository) {
+    public UpdateUserService(TransactionTemplate transactionTemplate,
+                             UserDAO userDAO,
+                             ImageDAO imageDAO,
+                             FireBaseStorageConfig storageConfig,
+                             GoogleCloudRepository googleCloudRepository,
+                             BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.transactionTemplate = transactionTemplate;
         this.userDAO = userDAO;
         this.imageDAO = imageDAO;
         this.storageConfig = storageConfig;
         this.googleCloudRepository = googleCloudRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
+
+    /*public UpdateUserService(TransactionTemplate transactionTemplate, UserDAO userDAO, ImageDAO imageDAO, FireBaseStorageConfig storageConfig, GoogleCloudRepository googleCloudRepository) {
+        this.transactionTemplate = transactionTemplate;
+        this.userDAO = userDAO;
+        this.imageDAO = imageDAO;
+        this.storageConfig = storageConfig;
+        this.googleCloudRepository = googleCloudRepository;
+    }*/
+
+
+    public ChangePasswordResponse changeUserPassword(ChangeUserPasswordRequest request) {
+        UserEntity userEntity = this.userDAO.findUserEntityByUserId(request.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        ErrorMessages.NOT_FOUND_BY_EID.getMessage()));
+        String encode = this.bCryptPasswordEncoder.encode(request.getOldPassword());
+        if (request.getOldPassword().length() == 0 || request.getOldPassword() != null) {
+            if (!bCryptPasswordEncoder.matches(request.getOldPassword(), userEntity.getPassword())) {
+                return new ChangePasswordResponse(false,
+                        "Provided password was invalid");
+            } else {
+                userEntity.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
+                userDAO.saveUserEntity(userEntity);
+                return new ChangePasswordResponse(true,
+                        "Password changed successfully");
+            }
+        }
+        return new ChangePasswordResponse(false,
+                "Provided password was invalid");
+    }
 
     public void changeUserDetails(UpdateUserDetailsRequest request) {
         UserEntity userEntity = userDAO.findUserEntityByUserId(request.getUserId())
