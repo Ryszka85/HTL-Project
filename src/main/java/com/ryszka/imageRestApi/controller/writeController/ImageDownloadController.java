@@ -1,5 +1,6 @@
 package com.ryszka.imageRestApi.controller.writeController;
 
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import com.ryszka.imageRestApi.config.FireBaseStorageConfig;
@@ -58,7 +59,9 @@ public class ImageDownloadController {
         BlobId blobId = BlobId.of(AppConfigProperties.BUCKET_NAME, originalFilePath);
         System.out.println(fireBaseStorageConfig.initAndGetStorage() != null);
         Storage storage = fireBaseStorageConfig.initAndGetStorage();
-        byte[] content = storage.get(blobId).getContent();
+        Blob blob = storage.get(blobId);
+        byte[] content = blob.getContent();
+        /*byte[] content = storage.get(blobId).getContent();*/
         imageEntity.setDownloaded(imageEntity.getDownloaded() + 1);
         imageDAO.saveImage(imageEntity);
         return new ResizeByIndividualResolution( (int) request.getWidth(), (int) request.getHeight(), content).resize();
@@ -70,9 +73,11 @@ public class ImageDownloadController {
         ImageEntity imageEntity = this.imageDAO.getImageByImageId(request.getImageId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.INVALID_ARGUMENTS.getMessage()));
         String originalFilePath = "original/" + imageEntity.getUserEntity().getUserId() + "/" + imageEntity.getName();
-        BlobId blobId = BlobId.of(AppConfigProperties.BUCKET_NAME, originalFilePath);
         Storage storage = fireBaseStorageConfig.initAndGetStorage();
-        byte[] content = storage.get(blobId).getContent();
+        System.out.println("Hallo???");
+        BlobId blobId = BlobId.of(AppConfigProperties.BUCKET_NAME, originalFilePath);
+        Blob blob = storage.get(blobId);
+        byte[] content = blob.getContent();
         imageEntity.setDownloaded(imageEntity.getDownloaded() + 1);
         imageDAO.saveImage(imageEntity);
         return new ResizeDownCroppedImage(content, request).resize();
