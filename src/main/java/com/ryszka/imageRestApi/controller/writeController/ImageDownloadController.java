@@ -59,8 +59,8 @@ public class ImageDownloadController {
         BlobId blobId = BlobId.of(AppConfigProperties.BUCKET_NAME, originalFilePath);
         System.out.println(fireBaseStorageConfig.initAndGetStorage() != null);
         Storage storage = fireBaseStorageConfig.initAndGetStorage();
-        Blob blob = storage.get(blobId);
-        byte[] content = blob.getContent();
+        /*Blob blob = storage.get(blobId);*/
+        byte[] content = storage.get(blobId).getContent();
         /*byte[] content = storage.get(blobId).getContent();*/
         imageEntity.setDownloaded(imageEntity.getDownloaded() + 1);
         imageDAO.saveImage(imageEntity);
@@ -76,8 +76,8 @@ public class ImageDownloadController {
         Storage storage = fireBaseStorageConfig.initAndGetStorage();
         System.out.println("Hallo???");
         BlobId blobId = BlobId.of(AppConfigProperties.BUCKET_NAME, originalFilePath);
-        Blob blob = storage.get(blobId);
-        byte[] content = blob.getContent();
+        /*Blob blob = storage.get(blobId);*/
+        byte[] content = storage.get(blobId).getContent();
         imageEntity.setDownloaded(imageEntity.getDownloaded() + 1);
         imageDAO.saveImage(imageEntity);
         return new ResizeDownCroppedImage(content, request).resize();
