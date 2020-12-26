@@ -1,10 +1,12 @@
 package com.ryszka.imageRestApi.service.serviceV2.writeService;
 
+import com.google.api.gax.rpc.InvalidArgumentException;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.ryszka.imageRestApi.config.FireBaseStorageConfig;
 import com.ryszka.imageRestApi.dao.ImageDAO;
 import com.ryszka.imageRestApi.dao.UserDAO;
+import com.ryszka.imageRestApi.errorHandling.EntityAccessNotAllowedException;
 import com.ryszka.imageRestApi.errorHandling.EntityNotFoundException;
 import com.ryszka.imageRestApi.errorHandling.EntityPersistenceException;
 import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
@@ -17,6 +19,7 @@ import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.util.ThumbnailProducer;
 import com.ryszka.imageRestApi.util.imageScaler.*;
 import com.ryszka.imageRestApi.viewModels.request.ChangeUserPasswordRequest;
+import com.ryszka.imageRestApi.viewModels.request.DeleteAccountRequest;
 import com.ryszka.imageRestApi.viewModels.request.UpdateUserDetailsRequest;
 import com.ryszka.imageRestApi.viewModels.response.ChangePasswordResponse;
 import net.coobird.thumbnailator.Thumbnails;
@@ -188,5 +191,15 @@ public class UpdateUserService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         ErrorMessages.NOT_FOUND_BY_EID.getMessage()
                 ));
+    }
+
+    public void deleteUserAccount(DeleteAccountRequest request) {
+        UserEntity userEntity = this.userDAO.findUserEntityByUserId(request.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        ErrorMessages.NOT_FOUND_BY_EID.getMessage()));
+        if (!this.bCryptPasswordEncoder.matches(request.getPassword(), userEntity.getPassword()))
+            throw new EntityAccessNotAllowedException(ErrorMessages.INVALID_ARGUMENTS.getMessage());
+        this.userDAO.deleteUserAccount(userEntity);
+
     }
 }
