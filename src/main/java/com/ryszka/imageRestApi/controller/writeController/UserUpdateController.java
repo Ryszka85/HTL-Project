@@ -3,6 +3,7 @@ package com.ryszka.imageRestApi.controller.writeController;
 import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.service.serviceV2.writeService.UpdateUserService;
 import com.ryszka.imageRestApi.viewModels.request.ChangeUserPasswordRequest;
+import com.ryszka.imageRestApi.viewModels.request.DeleteAccountRequest;
 import com.ryszka.imageRestApi.viewModels.request.UpdateUserDetailsRequest;
 import com.ryszka.imageRestApi.viewModels.response.ChangePasswordResponse;
 import org.springframework.web.bind.annotation.*;
@@ -41,5 +42,10 @@ public class UserUpdateController {
         /*updateUserService.addUserLike(imageId, userId);*/
         return updateUserService.changeUserPassword(request);
         /*updateUserService.changeUserDetails(request);*/
+    }
+
+    @PostMapping(value = "/deleteAccount")
+    public void deleteUserAccount(@RequestBody DeleteAccountRequest request) {
+        updateUserService.deleteUserAccount(request);
     }
 }

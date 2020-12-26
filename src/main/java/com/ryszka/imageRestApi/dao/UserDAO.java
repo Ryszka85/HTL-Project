@@ -40,4 +40,9 @@ public class UserDAO {
         logger.info("Attempting [ findByEmail ] query...");
         return Optional.ofNullable(this.userRepository.getByEmail(email));
     }
+
+    public void deleteUserAccount(UserEntity user) {
+        logger.info("Attempting [ deleteUserAccount ] action...");
+        this.userRepository.delete(user);
+    }
 }
