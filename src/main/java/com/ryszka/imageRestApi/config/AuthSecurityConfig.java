@@ -74,6 +74,8 @@ public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/users/signUp").permitAll()
                 .antMatchers(HttpMethod.POST, "/users/oauth/login").permitAll()
                 /*.antMatchers(HttpMethod.POST, "/images/set/tag/**").permitAll()*/
+                .antMatchers(HttpMethod.GET, "/users/redirect").permitAll()
+                .antMatchers(HttpMethod.GET, "/verify/account/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/testing").permitAll()
                 .antMatchers(HttpMethod.GET, "/reset/password/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/images/user/**").permitAll()

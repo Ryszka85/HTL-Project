@@ -62,6 +62,7 @@ public class GoogleAuthFilter extends UsernamePasswordAuthenticationFilter {
                         passwordEncoder.encode(PasswordGenerator.generateCommonLangPassword()));
                 UserEntity userEntity = com.ryszka.imageRestApi.util.mapper.ObjectMapper.mapByStrategy(userLoginRequest,
                         new LoginModelToUserEntity());
+                userEntity.setAccountVerified(true);
                 userDAO.saveUserEntity(userEntity);
                 context.setAuthentication(
                         new UsernamePasswordAuthenticationToken(userLoginRequest.getEmail(),userLoginRequest.getPassword(), new ArrayList<>()));

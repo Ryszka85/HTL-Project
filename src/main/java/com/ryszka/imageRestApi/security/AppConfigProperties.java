@@ -1,6 +1,7 @@
 package com.ryszka.imageRestApi.security;
 
 public class AppConfigProperties {
+    public static final String JWT_SECRET_SIGNUP = "htlWienWestSignUp";
     public static final String HOST = "127.0.0.1";
     public static final String USER = "Admin";
     public static final String PASSWORD = "Admin";

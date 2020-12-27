@@ -57,6 +57,10 @@ public class UserAuthService implements UserDetailsService {
             throw new UsernameNotFoundException("Could not find user to login..");
         return new User(userEntity.getEmail(),
                 userEntity.getPassword(),
+                userEntity.isAccountVerified(),
+                true,
+                true,
+                true,
                 new ArrayList<>());
     }
 }

@@ -28,6 +28,8 @@ public interface UserRepository extends CrudRepository<UserEntity, Integer> {
 
     UserEntity getByEmail(String email);
 
+    UserEntity findUserEntityByAccountVerificationToken(String token);
+
 
     @Query(value = DBQueryStatements.likeUserName, nativeQuery = true)
     List<UserEntity> findByUsername(@Param("username") String username);
