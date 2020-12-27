@@ -104,27 +104,19 @@ public class ImageDownloadController {
                 sessionDAO.findUserBySessionID(httpReq.getSession().getId());
         UserEntity userEntity = imageEntity.getUserEntity();
 
+        String path = "download/" + (imageDetailViewModel.getWidth() > imageDetailViewModel.getHeight() ?
+                "landscape/" + imageDetailViewModel.getWidth() :
+                "portrait/" + imageDetailViewModel.getHeight()) +
+                 "/" +  userEntity.getUserId() + "/" + imageEntity.getName();
 
-        Storage storage = fireBaseStorageConfig.initAndGetStorage();
-        /*List<ImageDetailViewModel> response = new ArrayList<>();*/
-        ImageDetailViewModel response = null;
-
-        System.out.println(imageDetailViewModel.getWidth());
-
-        String downloadPathWidth = "download/" + imageDetailViewModel.getWidth() + "/" + userEntity.getUserId() + "/" + imageEntity.getName();
-        String downloadPathHeight = "download/" + imageDetailViewModel.getHeight() + "/" + userEntity.getUserId() + "/" + imageEntity.getName();
         String originalFilePath = "original/" + userEntity.getUserId() + "/" + imageEntity.getName();
 
-        GoogleMediaDownloadLink googleMediaDownloadLinkWidth = new GoogleMediaDownloadLink(downloadPathWidth, fireBaseStorageConfig);
-        GoogleMediaDownloadLink googleMediaDownloadLinkHeight = new GoogleMediaDownloadLink(downloadPathHeight, fireBaseStorageConfig);
+        System.out.println(path);
+        GoogleMediaDownloadLink googleMediaDownloadLink = new GoogleMediaDownloadLink(path, fireBaseStorageConfig);
 
         Optional<ImageDetailViewModel> resp = Optional.empty();
-        if (googleMediaDownloadLinkWidth.generateLink() == null && googleMediaDownloadLinkHeight.generateLink() == null) {
-            resp = Optional.ofNullable(new GoogleMediaDownloadLink(originalFilePath, fireBaseStorageConfig).generateLink());
-        } else if (googleMediaDownloadLinkWidth.generateLink() == null) {
-            resp = Optional.ofNullable(googleMediaDownloadLinkHeight.generateLink());
-        } else resp = Optional.ofNullable(googleMediaDownloadLinkWidth.generateLink());
-
+        if (googleMediaDownloadLink.generateLink() == null) resp = Optional.ofNullable(new GoogleMediaDownloadLink(originalFilePath, fireBaseStorageConfig).generateLink());
+        else resp = Optional.ofNullable(googleMediaDownloadLink.generateLink());
 
         if (resp.isPresent()) {
             logger.info("is public ? : {}", imageEntity.getIsPublic());
