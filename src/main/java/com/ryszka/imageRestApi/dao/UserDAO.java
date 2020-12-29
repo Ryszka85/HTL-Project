@@ -20,6 +20,13 @@ public class UserDAO {
     }
 
 
+    public Optional<UserEntity> findUserEntityByToken(String token) {
+        logger.info("Attempting [ findUserEntityByToken ] query...");
+        return Optional.ofNullable(
+                userRepository.findUserEntityByAccountVerificationToken(token));
+    }
+
+
     public Optional<UserEntity> findUserEntityByUserId(String userId) {
         logger.info("Attempting [ findUserEntityByUserId ] query...");
         return Optional.ofNullable(

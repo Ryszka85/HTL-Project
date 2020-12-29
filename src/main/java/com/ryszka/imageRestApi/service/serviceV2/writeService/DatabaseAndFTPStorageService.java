@@ -134,7 +134,7 @@ public class DatabaseAndFTPStorageService {
 
                             // store file to cloud
                             cloudRepository.storeImage(
-                                    "download/" + width + "/" + imageDTO.getPath(),
+                                    "download/landscape/" + width + "/" + imageDTO.getPath(),
                                     imageDTO.getName(),
                                     downloadContent);
                         }
@@ -160,7 +160,7 @@ public class DatabaseAndFTPStorageService {
 
                             // store file to cloud
                             cloudRepository.storeImage(
-                                    "download/" + height + "/" + imageDTO.getPath(),
+                                    "download/portrait/" + height + "/" + imageDTO.getPath(),
                                     imageDTO.getName(),
                                     downloadContent);
                         }

@@ -25,6 +25,8 @@ public class UserEntity implements Serializable {
     @Column(name = "profile_img_path")
     private String profilePath;
     private boolean inactive = false;
+    @Column(name = "account_verified")
+    private boolean accountVerified;
     @JsonBackReference
     @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ImageEntity> imageEntities;
@@ -40,6 +42,11 @@ public class UserEntity implements Serializable {
 
     @Column(name = "login_type")
     private String loginType;
+
+    @JoinColumn(name = "token_id")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference
+    private AccountVerificationTokenEntity accountVerificationToken;
 
     public UserEntity() {
     }
@@ -156,5 +163,21 @@ public class UserEntity implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isAccountVerified() {
+        return accountVerified;
+    }
+
+    public void setAccountVerified(boolean accountVerified) {
+        this.accountVerified = accountVerified;
+    }
+
+    public AccountVerificationTokenEntity getAccountVerificationToken() {
+        return accountVerificationToken;
+    }
+
+    public void setAccountVerificationToken(AccountVerificationTokenEntity accountVerificationToken) {
+        this.accountVerificationToken = accountVerificationToken;
     }
 }

@@ -88,13 +88,13 @@ public class DBQueryStatements {
             " first_name, last_name," +
             " email, username, profile_img_path," +
             " password, inactive," +
-            " login_type, forgot_password_entity_token_id, id_address" +
+            " login_type, forgot_password_entity_token_id, id_address, token_id, account_verified" +
             " FROM USERS WHERE email like %:email%";
 
     public static final String likeUserName = "SELECT id, user_id, " +
             " first_name, last_name," +
             " email, username, profile_img_path," +
             " password, inactive," +
-            " login_type, forgot_password_entity_token_id, id_address" +
+            " login_type, forgot_password_entity_token_id, id_address, token_id, account_verified" +
             " FROM USERS WHERE username like %:username%";
 }
