@@ -59,7 +59,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             if (e.getMessage().equals("User is disabled")) {
                 response.setStatus(423);
                 mapper.writeValue(response.getWriter(),
-                        "Account need to be validated");
+                        "Account needs to be validated. Check your inbox.");
             } else {
                 response.setStatus(401);
                 mapper.writeValue(response.getWriter(),
