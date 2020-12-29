@@ -47,7 +47,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         return null;
     }
 
-    // hallo jaeger
+    // hallo jaeger 666
 
     private Authentication authenticate(UserLoginRequest userLoginRequest, HttpServletResponse response) throws IOException {
         try {
