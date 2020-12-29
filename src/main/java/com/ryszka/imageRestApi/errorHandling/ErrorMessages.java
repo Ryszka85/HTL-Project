@@ -1,5 +1,7 @@
 package com.ryszka.imageRestApi.errorHandling;
 
+import org.aspectj.internal.lang.annotation.ajcDeclareEoW;
+
 public enum ErrorMessages {
     IMAGES_NOT_FOUND_BY_TAG("Unable to find images by given tag."),
     IMAGES_NOT_FOUND_BY_ID("Unable to find images by given id."),
@@ -19,6 +21,8 @@ public enum ErrorMessages {
     ROLLED_BACK_IN_TX("Rolled back because error occurred."),
     INVALID_ARGUMENTS("Provided arguments are not valid."),
     ADDRESS_NOT_FOUND("Address could not be found!"),
+    ACCOUNT_NOT_ACTIVE("Account is not activated!"),
+    EMAIL_ALREADY_SENT("Verification email was already send. Please check your inbox"),
     ENTITY_ACCESS_NOT_ALLOWED("Request to access the entity was refused due to privacy reasons!");
 
     private final String message;

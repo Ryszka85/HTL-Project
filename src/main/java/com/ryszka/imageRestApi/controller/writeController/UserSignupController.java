@@ -40,7 +40,7 @@ public class UserSignupController {
 
 
 
-    @GetMapping(value = "/redirect")
+    /*@GetMapping(value = "/redirect")
     public ResponseEntity<Object> testRedirect() throws URISyntaxException {
         String foo = Jwts.builder()
                 .setSubject("FOO")
@@ -50,11 +50,11 @@ public class UserSignupController {
         System.out.println(new JWTVerifier(
                 foo, AppConfigProperties.JWT_SECRET_SIGNUP).verifyToken());
         return controller.redirectToUrl("http://localhost:4200/#/verify");
-        /*URI yahoo = new URI("http://localhost:4200/#/verify");
+        *//*URI yahoo = new URI("http://localhost:4200/#/verify");
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(yahoo);
-        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);*/
-    }
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);*//*
+    }*/
 
 
     @CrossOrigin

@@ -56,12 +56,18 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                             new ArrayList<>())
                     );
         } catch (AuthenticationException e) {
+            if (e.getMessage().equals("User is disabled")) {
+                response.setStatus(423);
+                mapper.writeValue(response.getWriter(),
+                        "Account need to be validated");
+            } else {
+                response.setStatus(401);
+                mapper.writeValue(response.getWriter(),
+                        ErrorMessages.LOGIN_ERROR_MESSAGE.getMessage());
+            }
             logger.error("{}", e.getMessage());
             /*response.setStatus(401);*/
             /*response.sendError(401, ErrorMessages.LOGIN_FAIL.getMessage());*/
-            response.setStatus(401);
-            mapper.writeValue(response.getWriter(),
-                    ErrorMessages.LOGIN_ERROR_MESSAGE.getMessage());
         }
         return null;
     }

@@ -76,6 +76,7 @@ public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
                 /*.antMatchers(HttpMethod.POST, "/images/set/tag/**").permitAll()*/
                 .antMatchers(HttpMethod.GET, "/users/redirect").permitAll()
                 .antMatchers(HttpMethod.GET, "/verify/account/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/verify/show-validated-token").permitAll()
                 .antMatchers(HttpMethod.GET, "/testing").permitAll()
                 .antMatchers(HttpMethod.GET, "/reset/password/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/images/user/**").permitAll()
@@ -99,6 +100,7 @@ public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/search/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/user/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/auth/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/users/insert/profile/**").permitAll()
                 .anyRequest().authenticated()
@@ -148,10 +150,10 @@ public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("*"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://10.0.0.2:4200"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(Arrays.asList(
-                "Authorization", "Cache-Control", "Content-Type", "withCredentials", "isMobile"));
+                "Authorization", "Cache-Control", "Content-Type", "withCredentials", "isMobile", "tokenRefresh"));
         configuration.setExposedHeaders(Collections.singletonList("UserId"));
         configuration.setAllowCredentials(true);
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
