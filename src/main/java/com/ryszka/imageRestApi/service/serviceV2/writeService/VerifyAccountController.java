@@ -85,9 +85,7 @@ public class VerifyAccountController {
         } catch (ExpiredJwtException | IllegalArgumentException | SignatureException | MalformedJwtException | UnsupportedJwtException e) {
             logger.info("Token is expired!!");
             assert tokenEntity != null;
-            System.out.println(tokenEntity.getTokenId());
-            return redirectController.redirectToUrl("http://localhost:4200/#/verify;id=" +
-                    tokenEntity.getTokenId(), response);
+            return redirectController.redirectToUrl("http://localhost:4200/#/verify;id=66666", response);
         }
         return null;
     }
