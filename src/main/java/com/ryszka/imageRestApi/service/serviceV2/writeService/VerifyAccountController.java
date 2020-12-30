@@ -10,6 +10,7 @@ import com.ryszka.imageRestApi.repository.AccountVerificationRepository;
 import com.ryszka.imageRestApi.security.AppConfigProperties;
 import com.ryszka.imageRestApi.security.JWTVerifier;
 import com.ryszka.imageRestApi.service.serviceV2.readService.UserAuthService;
+import com.ryszka.imageRestApi.viewModels.ShowTokenValidationResponse;
 import com.ryszka.imageRestApi.viewModels.request.TokenIdRequest;
 import com.ryszka.imageRestApi.viewModels.response.SignedUpUserDetailsResponse;
 import io.jsonwebtoken.*;
@@ -58,7 +59,6 @@ public class VerifyAccountController {
                     .getBody();
             Date tokenExpirationDate = body.getExpiration();
             Date today = new Date();
-            System.out.println(tokenExpirationDate.before(today));
             if (!tokenExpirationDate.before(today) && !tokenEntity.getIsProcessedByView() && !tokenEntity.isWasValidated()) {
                 System.out.println(body);
                 tokenEntity.setWasValidated(true);
@@ -114,35 +114,4 @@ public class VerifyAccountController {
 
 }
 
-class ShowTokenValidationResponse {
-    private boolean status;
-    private boolean alreadyProcessed;
 
-    public ShowTokenValidationResponse() {
-    }
-
-    public ShowTokenValidationResponse(boolean status) {
-        this.status = status;
-    }
-
-    public ShowTokenValidationResponse(boolean status, boolean alreadyProcessed) {
-        this.status = status;
-        this.alreadyProcessed = alreadyProcessed;
-    }
-
-    public boolean isAlreadyProcessed() {
-        return alreadyProcessed;
-    }
-
-    public void setAlreadyProcessed(boolean alreadyProcessed) {
-        this.alreadyProcessed = alreadyProcessed;
-    }
-
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-}

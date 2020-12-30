@@ -12,8 +12,10 @@ import com.ryszka.imageRestApi.errorHandling.EntityPersistenceException;
 import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
 import com.ryszka.imageRestApi.persistenceEntities.FtpPersistenceEntity;
 import com.ryszka.imageRestApi.persistenceEntities.ImageEntity;
+import com.ryszka.imageRestApi.persistenceEntities.PasswordResetTokenEntity;
 import com.ryszka.imageRestApi.persistenceEntities.UserEntity;
 import com.ryszka.imageRestApi.repository.GoogleCloudRepository;
+import com.ryszka.imageRestApi.repository.PasswordResetTokenRepository;
 import com.ryszka.imageRestApi.security.AppConfigProperties;
 import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.util.ThumbnailProducer;
@@ -45,19 +47,21 @@ public class UpdateUserService {
     private final FireBaseStorageConfig storageConfig;
     private final GoogleCloudRepository googleCloudRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     public UpdateUserService(TransactionTemplate transactionTemplate,
                              UserDAO userDAO,
                              ImageDAO imageDAO,
                              FireBaseStorageConfig storageConfig,
                              GoogleCloudRepository googleCloudRepository,
-                             BCryptPasswordEncoder bCryptPasswordEncoder) {
+                             BCryptPasswordEncoder bCryptPasswordEncoder, PasswordResetTokenRepository tokenRepository) {
         this.transactionTemplate = transactionTemplate;
         this.userDAO = userDAO;
         this.imageDAO = imageDAO;
         this.storageConfig = storageConfig;
         this.googleCloudRepository = googleCloudRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.passwordResetTokenRepository = tokenRepository;
     }
 
 
@@ -74,17 +78,29 @@ public class UpdateUserService {
         UserEntity userEntity = this.userDAO.findUserEntityByUserId(request.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         ErrorMessages.NOT_FOUND_BY_EID.getMessage()));
-        String encode = this.bCryptPasswordEncoder.encode(request.getOldPassword());
-        if (request.getOldPassword().length() == 0 || request.getOldPassword() != null) {
-            if (!bCryptPasswordEncoder.matches(request.getOldPassword(), userEntity.getPassword())) {
-                return new ChangePasswordResponse(false,
-                        "Provided password was invalid");
-            } else {
-                userEntity.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
-                userDAO.saveUserEntity(userEntity);
-                return new ChangePasswordResponse(true,
-                        "Password changed successfully");
-            }
+        if (this.passwordResetTokenRepository
+                .getByUserEntity(userEntity)
+                .isPresent()) {
+            userEntity.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
+            userEntity.setTokenEntity(null);
+            userDAO.saveUserEntity(userEntity);
+            PasswordResetTokenEntity passwordResetTokenEntity = this.passwordResetTokenRepository
+                    .getByUserEntity(userEntity).get();
+            this.passwordResetTokenRepository.delete(passwordResetTokenEntity);
+            return new ChangePasswordResponse(true,
+                    "Password changed successfully");
+
+        } else if (request.getOldPassword().length() == 0 || request.getOldPassword() != null){
+            String encode = this.bCryptPasswordEncoder.encode(request.getOldPassword());
+                if (!bCryptPasswordEncoder.matches(request.getOldPassword(), userEntity.getPassword())) {
+                    return new ChangePasswordResponse(false,
+                            "Provided password was invalid");
+                } else {
+                    userEntity.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
+                    userDAO.saveUserEntity(userEntity);
+                    return new ChangePasswordResponse(true,
+                            "Password changed successfully");
+                }
         }
         return new ChangePasswordResponse(false,
                 "Provided password was invalid");

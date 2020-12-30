@@ -48,6 +48,10 @@ public class UserEntity implements Serializable {
     @JsonBackReference
     private AccountVerificationTokenEntity accountVerificationToken;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "userEntity")
+    @JsonBackReference
+    private PasswordResetTokenEntity tokenEntity;
+
     public UserEntity() {
     }
 
@@ -179,5 +183,13 @@ public class UserEntity implements Serializable {
 
     public void setAccountVerificationToken(AccountVerificationTokenEntity accountVerificationToken) {
         this.accountVerificationToken = accountVerificationToken;
+    }
+
+    public PasswordResetTokenEntity getTokenEntity() {
+        return tokenEntity;
+    }
+
+    public void setTokenEntity(PasswordResetTokenEntity tokenEntity) {
+        this.tokenEntity = tokenEntity;
     }
 }
