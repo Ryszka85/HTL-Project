@@ -50,7 +50,7 @@ public class VerifyAccountController {
         Claims body = null;
         AccountVerificationTokenEntity tokenEntity = null;
         try {
-
+            logger.info("attempting [ verificationRepository.getByToken ]..");
             tokenEntity = verificationRepository.getByToken(token)
                     .orElseThrow(() -> new IllegalArgumentException("Token not found!"));
             body = Jwts.parser()
@@ -65,10 +65,12 @@ public class VerifyAccountController {
                 String verifiedToken = new JWTVerifier(token, AppConfigProperties.JWT_SECRET_SIGNUP)
                         .verifyToken();
                 if (verifiedToken != null) {
+                    logger.info("token was verified successful.");
                     Optional<UserEntity> userEntityByToken = userDAO.findByEmail(body.getSubject());
                     UserEntity userEntity1 = userEntityByToken.get();
                     if (userEntityByToken.isPresent() &&
                             userEntity1.getAccountVerificationToken().getToken().equals(tokenEntity.getToken())) {
+                        logger.info("get user by token ...");
                         UserEntity userEntity = userEntityByToken.get();
                         userEntity.setAccountVerified(true);
                         userDAO.saveUserEntity(userEntity);
@@ -87,6 +89,7 @@ public class VerifyAccountController {
             assert tokenEntity != null;
             return redirectController.redirectToUrl("http://localhost:4200/#/verify;id=66666", response);
         }
+        logger.info("Something went really wrong!");
         return null;
     }
 
@@ -95,7 +98,8 @@ public class VerifyAccountController {
         System.out.println(request.getTokenId());
         try {
             AccountVerificationTokenEntity entity = verificationRepository
-                    .getAccountVerificationTokenEntityByTokenId(request.getTokenId());
+                    .getAccountVerificationTokenEntityByTokenId(request.getTokenId())
+                    .orElseThrow(() -> new EntityNotFoundException("Token is invalid!"));
             if (entity.isWasValidated() && !entity.getIsProcessedByView()) {
                 entity.setProcessedByView(true);
                 verificationRepository.save(entity);

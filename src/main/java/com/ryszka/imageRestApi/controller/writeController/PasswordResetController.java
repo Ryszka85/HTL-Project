@@ -13,11 +13,16 @@ import com.ryszka.imageRestApi.standardMesages.StandardMessages;
 import com.ryszka.imageRestApi.util.EmailSender;
 import com.ryszka.imageRestApi.viewModels.PasswordResetTokenRequest;
 import com.ryszka.imageRestApi.viewModels.ShowTokenValidationResponse;
+import com.ryszka.imageRestApi.viewModels.request.ChangePasswordFromRedirectRequest;
 import com.ryszka.imageRestApi.viewModels.request.TokenIdRequest;
+import com.ryszka.imageRestApi.viewModels.response.ChangePasswordResponse;
+import com.ryszka.imageRestApi.viewModels.response.UserDetailsResponseModel;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
@@ -36,13 +41,16 @@ public class PasswordResetController {
     private EmailSender emailSender;
     private final Logger logger = LoggerFactory.getLogger(PasswordResetController.class);
     private final RedirectController redirectController;
+    private final BCryptPasswordEncoder passwordEncoder;
 
 
     public PasswordResetController(EmailSender emailSender,
                                    EmailService emailService,
                                    UserDAO userDAO,
                                    PasswordResetTokenRepository passwordResetTokenRepository,
-                                   RedirectController redirectController) {
+                                   RedirectController redirectController,
+                                   BCryptPasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
         this.redirectController = redirectController;
         this.userDAO = userDAO;
         this.emailService = emailService;
@@ -97,9 +105,10 @@ public class PasswordResetController {
 
         Claims body = null;
         logger.info("Starting [ passwordTokenRepository.getByToken ]");
-        PasswordResetTokenEntity passwordResetTokenEntity = tokenRepository.getByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Reset-password-token could not be found"));
+        PasswordResetTokenEntity passwordResetTokenEntity = null;
+        if (tokenRepository.getByToken(token).isEmpty()) {
+            return redirectController.redirectToUrl("http://localhost:4200/#/renew-password/:66666", response);
+        } else passwordResetTokenEntity = tokenRepository.getByToken(token).get();
         try {
             logger.info("Starting [ Jwts.parser() ]");
             body = Jwts.parser()
@@ -125,7 +134,8 @@ public class PasswordResetController {
                         passwordResetTokenEntity.getTokenId(), response);
             }
         } catch (ExpiredJwtException | URISyntaxException | IllegalArgumentException | SignatureException | MalformedJwtException | UnsupportedJwtException e) {
-            return ResponseEntity.status(403).body("Token is invalid -> " + e.getMessage());
+            return redirectController.redirectToUrl("http://localhost:4200/#/renew-password/:" +
+                    null, response);
         }
         return null;
     }
@@ -144,7 +154,61 @@ public class PasswordResetController {
                 byTokenId.getTokenId(),
                 byTokenId.getUserEntity().getUserId());
     }
+
+    @PostMapping(value = "/from-redirect")
+    public ResponseEntity<Boolean> resetPasswordFromRedirect(@RequestBody ChangePasswordFromRedirectRequest request) {
+        logger.info("Entered [ resetPasswordFromRedirect ]");
+        logger.info("starting [ userDAO.findUserEntityByUserId ]");
+        UserEntity userEntity = this.userDAO.findUserEntityByUserId(request.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Invalid request. User could not be found."));
+        logger.info("starting [ tokenRepository.getByTokenId ]");
+        PasswordResetTokenEntity passwordResetTokenEntity = tokenRepository.getByTokenId(request.getTokenId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Invalid request. Token is invalid."));
+        if (passwordEncoder.matches(request.getPassword(), userEntity.getPassword())) {
+            /*userEntity.setTokenEntity(null);
+            userDAO.saveUserEntity(userEntity);
+            tokenRepository.delete(passwordResetTokenEntity);*/
+            throw new EntityNotFoundException("New Password has to be different from old password.");
+        }
+
+        Claims body = null;
+
+        try {
+            logger.info("starting [ Jwts.parser() ]");
+            body = Jwts.parser()
+                    .setSigningKey(AppConfigProperties.JWT_SECRET_SIGNUP)
+                    .parseClaimsJws(passwordResetTokenEntity.getToken())
+                    .getBody();
+            Date tokenExpirationDate = body.getExpiration();
+            Date today = new Date();
+            if (userEntity.getTokenEntity()
+                    .getToken()
+                    .equals(passwordResetTokenEntity.getToken()) &&
+                    !tokenExpirationDate.before(today)){
+                userEntity.setPassword(this.passwordEncoder.encode(request.getPassword()));
+                userEntity.setTokenEntity(null);
+                userDAO.saveUserEntity(userEntity);
+                tokenRepository.delete(passwordResetTokenEntity);
+                return ResponseEntity.status(200)
+                        .body(true);
+
+            }
+        } catch (ExpiredJwtException | IllegalArgumentException | SignatureException | MalformedJwtException | UnsupportedJwtException e) {
+            logger.error("Error while validating token");
+        }
+
+        userEntity.setTokenEntity(null);
+        userDAO.saveUserEntity(userEntity);
+        tokenRepository.delete(passwordResetTokenEntity);
+        return ResponseEntity.status(403)
+                .body(false);
+
+    }
 }
+
+
 
 
 class ValidatedResetPasswordTokenIdResponse {

@@ -78,19 +78,7 @@ public class UpdateUserService {
         UserEntity userEntity = this.userDAO.findUserEntityByUserId(request.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         ErrorMessages.NOT_FOUND_BY_EID.getMessage()));
-        if (this.passwordResetTokenRepository
-                .getByUserEntity(userEntity)
-                .isPresent()) {
-            userEntity.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
-            userEntity.setTokenEntity(null);
-            userDAO.saveUserEntity(userEntity);
-            PasswordResetTokenEntity passwordResetTokenEntity = this.passwordResetTokenRepository
-                    .getByUserEntity(userEntity).get();
-            this.passwordResetTokenRepository.delete(passwordResetTokenEntity);
-            return new ChangePasswordResponse(true,
-                    "Password changed successfully");
-
-        } else if (request.getOldPassword().length() == 0 || request.getOldPassword() != null){
+        if (request.getOldPassword().length() == 0 || request.getOldPassword() != null){
             String encode = this.bCryptPasswordEncoder.encode(request.getOldPassword());
                 if (!bCryptPasswordEncoder.matches(request.getOldPassword(), userEntity.getPassword())) {
                     return new ChangePasswordResponse(false,

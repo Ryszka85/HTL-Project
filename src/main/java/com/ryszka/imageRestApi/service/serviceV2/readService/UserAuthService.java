@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class UserAuthService implements UserDetailsService {
@@ -84,7 +85,8 @@ public class UserAuthService implements UserDetailsService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "User account could not be found"));
         AccountVerificationTokenEntity verificationTokenEntityByTokenId = verificationRepository.getAccountVerificationTokenEntityByTokenId(userEntity
-                .getAccountVerificationToken().getTokenId());
+                .getAccountVerificationToken().getTokenId())
+                .orElseThrow(() -> new EntityNotFoundException("Token is invalid"));
         Claims body = null;
         try {
 
@@ -128,6 +130,9 @@ public class UserAuthService implements UserDetailsService {
 
 
         } catch (ExpiredJwtException | IllegalArgumentException | SignatureException | MalformedJwtException | UnsupportedJwtException e) {
+            userEntity.setAccountVerificationToken(null);
+            userDAO.saveUserEntity(userEntity);
+            /*verificationRepository.delete();*/
              throw new AccountNotActiveException("Email could not be send due to invalid arguments.");
         }
     }
