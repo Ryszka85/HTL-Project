@@ -26,6 +26,7 @@ public class UserDTOToUserEntity implements MapStrategy<UserDTO, UserEntity> {
         entity.setEmail(source.getEmail());
         entity.setPassword(passwordEncoder.encode(source.getPassword()));
         entity.setUsername(setUserName.apply(source));
+        entity.setAccountVerified(false);
         return entity;
     }
 }

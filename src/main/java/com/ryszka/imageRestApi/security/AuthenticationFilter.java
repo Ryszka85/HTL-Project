@@ -47,6 +47,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         return null;
     }
 
+    // hallo jaeger 666
+
     private Authentication authenticate(UserLoginRequest userLoginRequest, HttpServletResponse response) throws IOException {
         try {
             return authenticationManager
@@ -56,12 +58,18 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                             new ArrayList<>())
                     );
         } catch (AuthenticationException e) {
+            if (e.getMessage().equals("User is disabled")) {
+                response.setStatus(423);
+                mapper.writeValue(response.getWriter(),
+                        "Account needs to be validated. Check your inbox.");
+            } else {
+                response.setStatus(401);
+                mapper.writeValue(response.getWriter(),
+                        ErrorMessages.LOGIN_ERROR_MESSAGE.getMessage());
+            }
             logger.error("{}", e.getMessage());
             /*response.setStatus(401);*/
             /*response.sendError(401, ErrorMessages.LOGIN_FAIL.getMessage());*/
-            response.setStatus(401);
-            mapper.writeValue(response.getWriter(),
-                    ErrorMessages.LOGIN_ERROR_MESSAGE.getMessage());
         }
         return null;
     }
