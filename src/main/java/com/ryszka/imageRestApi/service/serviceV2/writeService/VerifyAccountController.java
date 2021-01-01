@@ -10,6 +10,7 @@ import com.ryszka.imageRestApi.repository.AccountVerificationRepository;
 import com.ryszka.imageRestApi.security.AppConfigProperties;
 import com.ryszka.imageRestApi.security.JWTVerifier;
 import com.ryszka.imageRestApi.service.serviceV2.readService.UserAuthService;
+import com.ryszka.imageRestApi.viewModels.ShowTokenValidationResponse;
 import com.ryszka.imageRestApi.viewModels.request.TokenIdRequest;
 import com.ryszka.imageRestApi.viewModels.response.SignedUpUserDetailsResponse;
 import io.jsonwebtoken.*;
@@ -49,7 +50,7 @@ public class VerifyAccountController {
         Claims body = null;
         AccountVerificationTokenEntity tokenEntity = null;
         try {
-
+            logger.info("attempting [ verificationRepository.getByToken ]..");
             tokenEntity = verificationRepository.getByToken(token)
                     .orElseThrow(() -> new IllegalArgumentException("Token not found!"));
             body = Jwts.parser()
@@ -58,17 +59,18 @@ public class VerifyAccountController {
                     .getBody();
             Date tokenExpirationDate = body.getExpiration();
             Date today = new Date();
-            System.out.println(tokenExpirationDate.before(today));
             if (!tokenExpirationDate.before(today) && !tokenEntity.getIsProcessedByView() && !tokenEntity.isWasValidated()) {
                 System.out.println(body);
                 tokenEntity.setWasValidated(true);
                 String verifiedToken = new JWTVerifier(token, AppConfigProperties.JWT_SECRET_SIGNUP)
                         .verifyToken();
                 if (verifiedToken != null) {
+                    logger.info("token was verified successful.");
                     Optional<UserEntity> userEntityByToken = userDAO.findByEmail(body.getSubject());
                     UserEntity userEntity1 = userEntityByToken.get();
                     if (userEntityByToken.isPresent() &&
                             userEntity1.getAccountVerificationToken().getToken().equals(tokenEntity.getToken())) {
+                        logger.info("get user by token ...");
                         UserEntity userEntity = userEntityByToken.get();
                         userEntity.setAccountVerified(true);
                         userDAO.saveUserEntity(userEntity);
@@ -87,6 +89,7 @@ public class VerifyAccountController {
             assert tokenEntity != null;
             return redirectController.redirectToUrl("http://localhost:4200/#/verify;id=66666", response);
         }
+        logger.info("Something went really wrong!");
         return null;
     }
 
@@ -95,7 +98,8 @@ public class VerifyAccountController {
         System.out.println(request.getTokenId());
         try {
             AccountVerificationTokenEntity entity = verificationRepository
-                    .getAccountVerificationTokenEntityByTokenId(request.getTokenId());
+                    .getAccountVerificationTokenEntityByTokenId(request.getTokenId())
+                    .orElseThrow(() -> new EntityNotFoundException("Token is invalid!"));
             if (entity.isWasValidated() && !entity.getIsProcessedByView()) {
                 entity.setProcessedByView(true);
                 verificationRepository.save(entity);
@@ -114,35 +118,4 @@ public class VerifyAccountController {
 
 }
 
-class ShowTokenValidationResponse {
-    private boolean status;
-    private boolean alreadyProcessed;
 
-    public ShowTokenValidationResponse() {
-    }
-
-    public ShowTokenValidationResponse(boolean status) {
-        this.status = status;
-    }
-
-    public ShowTokenValidationResponse(boolean status, boolean alreadyProcessed) {
-        this.status = status;
-        this.alreadyProcessed = alreadyProcessed;
-    }
-
-    public boolean isAlreadyProcessed() {
-        return alreadyProcessed;
-    }
-
-    public void setAlreadyProcessed(boolean alreadyProcessed) {
-        this.alreadyProcessed = alreadyProcessed;
-    }
-
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-}

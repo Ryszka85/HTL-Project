@@ -1,18 +1,16 @@
 package com.ryszka.imageRestApi.service.serviceV2.readService;
 
-import com.ryszka.imageRestApi.controller.readController.RedirectController;
 import com.ryszka.imageRestApi.dao.SessionDAO;
 import com.ryszka.imageRestApi.dao.UserDAO;
 import com.ryszka.imageRestApi.errorHandling.AccountNotActiveException;
-import com.ryszka.imageRestApi.errorHandling.EmailAlreadySentException;
 import com.ryszka.imageRestApi.errorHandling.EntityNotFoundException;
 import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
 import com.ryszka.imageRestApi.persistenceEntities.AccountVerificationTokenEntity;
 import com.ryszka.imageRestApi.repository.AccountVerificationRepository;
 import com.ryszka.imageRestApi.security.AppConfigProperties;
+import com.ryszka.imageRestApi.standardMesages.StandardMessages;
 import com.ryszka.imageRestApi.util.EmailSender;
 import com.ryszka.imageRestApi.viewModels.request.RenewAccountTokenRequest;
-import com.ryszka.imageRestApi.viewModels.request.UserLoginRequest;
 import com.ryszka.imageRestApi.viewModels.response.UserDetailsResponseModel;
 import com.ryszka.imageRestApi.persistenceEntities.SessionEntity;
 import com.ryszka.imageRestApi.persistenceEntities.UserEntity;
@@ -30,11 +28,10 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
-import java.io.NotActiveException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.UUID;
+import java.util.Optional;
 
 @Service
 public class UserAuthService implements UserDetailsService {
@@ -88,20 +85,18 @@ public class UserAuthService implements UserDetailsService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "User account could not be found"));
         AccountVerificationTokenEntity verificationTokenEntityByTokenId = verificationRepository.getAccountVerificationTokenEntityByTokenId(userEntity
-                .getAccountVerificationToken().getTokenId());
+                .getAccountVerificationToken().getTokenId())
+                .orElseThrow(() -> new EntityNotFoundException("Token is invalid"));
         Claims body = null;
         try {
 
             // if body exists then token is not expired
             // verification email was already sent
 
-            body = Jwts.parser()
+            /*body = Jwts.parser()
                     .setSigningKey(AppConfigProperties.JWT_SECRET_SIGNUP)
                     .parseClaimsJws(verificationTokenEntityByTokenId.getToken())
-                    .getBody();
-            throw new EmailAlreadySentException(ErrorMessages.EMAIL_ALREADY_SENT.getMessage());
-
-        } catch (ExpiredJwtException | IllegalArgumentException | SignatureException | MalformedJwtException | UnsupportedJwtException e) {
+                    .getBody();*/
 
             String token = Jwts.builder()
                     .setSubject(userEntity.getEmail())
@@ -121,8 +116,24 @@ public class UserAuthService implements UserDetailsService {
                 verificationTokenEntityByTokenId.setProcessedByView(false);
                 verificationTokenEntityByTokenId.setWasValidated(false);
                 verificationRepository.save(verificationTokenEntityByTokenId);
-                emailSender.sendVerifyAccountEmail(userEntity.getEmail(), token);
-            } else throw new AccountNotActiveException("Email could not be send due to invalid arguments.");
+                emailSender.sendVerifyTokenEmail(
+                        "Verify your email",
+                        "http://localhost:8880/image-app/verify/account/",
+                        StandardMessages.ACCOUNT_VERIFY_EMAIL_TEXT.getMsg(),
+                        "Activate-account,",
+                        userEntity.getEmail(),
+                        token);
+            }
+
+
+            /*throw new EmailAlreadySentException(ErrorMessages.EMAIL_ALREADY_SENT.getMessage());*/
+
+
+        } catch (ExpiredJwtException | IllegalArgumentException | SignatureException | MalformedJwtException | UnsupportedJwtException e) {
+            userEntity.setAccountVerificationToken(null);
+            userDAO.saveUserEntity(userEntity);
+            /*verificationRepository.delete();*/
+             throw new AccountNotActiveException("Email could not be send due to invalid arguments.");
         }
     }
 

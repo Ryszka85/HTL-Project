@@ -62,6 +62,7 @@ public class ReadUserLibraryService {
     public byte[] getImageBytesByImgId(String imageId, HttpServletRequest request) throws IOException {
         boolean isOwner = false;
 
+
         // search in db for the image
         ImageEntity imageEntity = this.imageDAO
                 .getImageByImageId(imageId)
@@ -84,9 +85,15 @@ public class ReadUserLibraryService {
                     .isPresent();
         }
 
+        int isMobileHeaderVal = Integer.parseInt(request.getHeader("isMobile"));
+        boolean isMobile = isMobileHeaderVal == 1;
+        System.out.println(isMobile);
+
         // check if file exists in cloud
         // when yes then
-        String originalFilePath = "original/" + imageEntity.getUserEntity().getUserId() + "/" + imageEntity.getName();
+        String originalFilePath = (!isMobile ? "original/" : "gallery/") +
+                imageEntity.getUserEntity().getUserId() + "/" + imageEntity.getName();
+        System.out.println(originalFilePath);
         if (isOwner || imageEntity.getIsPublic()) {
             Storage storage = storageConfig.initAndGetStorage();
             BlobId blobId = BlobId.of(AppConfigProperties.BUCKET_NAME, originalFilePath);

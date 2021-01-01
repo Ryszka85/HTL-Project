@@ -10,7 +10,7 @@ public interface AccountVerificationRepository extends CrudRepository<AccountVer
 
     AccountVerificationTokenEntity getByUserEntity(UserEntity userEntity);
 
-    AccountVerificationTokenEntity getAccountVerificationTokenEntityByTokenId(String tokenId);
+    Optional<AccountVerificationTokenEntity> getAccountVerificationTokenEntityByTokenId(String tokenId);
 
     Optional<AccountVerificationTokenEntity> getByToken(String tokenId);
 

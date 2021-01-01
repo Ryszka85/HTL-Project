@@ -18,22 +18,22 @@ public class EmailSender {
         this.emailService = emailService;
     }
 
-    public void sendVerifyAccountEmail(String to, String linkSuffix) throws MessagingException, URISyntaxException {
+    public void sendVerifyTokenEmail(String subject, String url , String text, String linkName, String to, String linkSuffix) throws MessagingException, URISyntaxException {
         MimeMessage mimeMessage = emailService.getJavaMailSender().createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
         helper.setFrom("adrian.ryszka@gmx.net");
         helper.setTo(to);
-        helper.setSubject("Verify your email");
+        helper.setSubject(subject);
         StringBuilder sb = new StringBuilder("");
-        URI redirectUrl = new URI("http://localhost:8880/image-app/verify/account/" + linkSuffix);
+        URI redirectUrl = new URI(url + linkSuffix);
         helper.setText( sb.append("<body>")
                         .append("<h1>Welcome to SpecShots</h1>")
-                        .append("<p>In order to user our services you have to click on the provided link for account verification purposes.</p>")
+                        .append("<p>").append(text).append("</p>")
                         .append("<a href=\"")
                         .append(redirectUrl.toString())
                         .append("\">")
-                        .append("Activate account")
+                        .append(linkName)
                         .append("</a>")
                         .append("</body>")
                         .toString(),

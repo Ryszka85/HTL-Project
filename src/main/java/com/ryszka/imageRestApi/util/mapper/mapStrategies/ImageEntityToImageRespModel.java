@@ -44,7 +44,8 @@ public class ImageEntityToImageRespModel implements MapStrategy<ImageEntity, Use
                 source.getDownloaded(),
                 details,
                 source.getUploadDate(),
-                originalImgPath
+                originalImgPath,
+                fileAccessLink
 
         );
     }

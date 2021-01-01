@@ -2,32 +2,24 @@ package com.ryszka.imageRestApi.service.serviceV2.writeService;
 
 import com.ryszka.imageRestApi.dao.UserDAO;
 import com.ryszka.imageRestApi.dao.ZipAndRegionDAO;
-import com.ryszka.imageRestApi.errorHandling.AddressNotFoundException;
 import com.ryszka.imageRestApi.errorHandling.EntityPersistenceException;
 import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
 import com.ryszka.imageRestApi.errorHandling.UserRegistrationFailedException;
 import com.ryszka.imageRestApi.persistenceEntities.AccountVerificationTokenEntity;
-import com.ryszka.imageRestApi.persistenceEntities.UserAddressEntity;
 import com.ryszka.imageRestApi.persistenceEntities.UserEntity;
 import com.ryszka.imageRestApi.repository.AccountVerificationRepository;
 import com.ryszka.imageRestApi.security.AppConfigProperties;
-import com.ryszka.imageRestApi.security.JWTVerifier;
 import com.ryszka.imageRestApi.service.serviceV2.EmailService;
+import com.ryszka.imageRestApi.standardMesages.StandardMessages;
 import com.ryszka.imageRestApi.util.EmailSender;
 import com.ryszka.imageRestApi.util.mapper.ObjectMapper;
-import com.ryszka.imageRestApi.util.mapper.mapStrategies.SetAddressToUserEntity;
 import com.ryszka.imageRestApi.util.mapper.mapStrategies.UserDTOToUserEntity;
 import com.ryszka.imageRestApi.viewModels.response.SignedUpUserDetailsResponse;
-import com.ryszka.imageRestApi.persistenceEntities.ZipAndRegionEntity;
 import com.ryszka.imageRestApi.service.dto.UserDTO;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.hibernate.id.UUIDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +29,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;*/
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Optional;
@@ -85,16 +75,7 @@ public class UserSignupService {
                 System.lineSeparator() + ErrorMessages.USER_ALREADY_EXISTS.getMessage());
 
         UserEntity newUser = ObjectMapper.mapByStrategy(userDTO, new UserDTOToUserEntity(passwordEncoder));
-        /*UserAddressEntity userAddressEntity = ObjectMapper.mapByStrategy(userDTO, new SetAddressToUserEntity());
-        newUser.setUserAddress(userAddressEntity);
-        Optional<ZipAndRegionEntity> byZipCodeOpt = zipAndRegionDAO.getByZipCode(userDTO.getAddressDTO().getZipcode());
 
-        if (byZipCodeOpt.isEmpty()) throw new AddressNotFoundException(
-                ErrorMessages.ADDRESS_NOT_FOUND.getMessage());
-
-        ZipAndRegionEntity zipAndRegionEntity = byZipCodeOpt.get();
-        userAddressEntity.setZipAndRegionEntity(zipAndRegionEntity);
-        newUser.setUserAddress(userAddressEntity);*/
         newUser.setLoginType("STANDARD");
 
 
@@ -109,28 +90,12 @@ public class UserSignupService {
         accountVerificationTokenEntity.setUserEntity(newUser);
         verificationRepository.save(accountVerificationTokenEntity);
         newUser.setAccountVerificationToken(accountVerificationTokenEntity);
-        emailSender.sendVerifyAccountEmail(newUser.getEmail(), token);
-        /*MimeMessage mimeMessage = emailService.getJavaMailSender().createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
-
-        helper.setFrom("adrian.ryszka@gmx.net");
-        helper.setTo(newUser.getEmail());
-        helper.setSubject("Verify your email");
-        StringBuilder sb = new StringBuilder("");
-        URI redirectUrl = new URI("http://localhost:8880/image-app/verify/account/" + token);
-        helper.setText( sb.append("<body>")
-                        .append("<h1>Welcome to SpecShots</h1>")
-                        .append("<p>In order to user our services you have to click on the provided link for account verification purposes.</p>")
-                        .append("<a href=\"")
-                        .append(redirectUrl.toString())
-                        .append("\">")
-                        .append("Activate account")
-                        .append("</a>")
-                        .append("</body>")
-                .toString(),
-                true  );
-
-        emailService.getJavaMailSender().send(mimeMessage);*/
+        emailSender.sendVerifyTokenEmail("Verify your email",
+                "http://localhost:8880/image-app/verify/account/",
+                StandardMessages.ACCOUNT_VERIFY_EMAIL_TEXT.getMsg(),
+                "Activate-account",
+                newUser.getEmail(),
+                token);
         try {
             userDAO.saveUserEntity(newUser);
             return new SignedUpUserDetailsResponse(newUser.getUserId(), newUser.getEmail());
