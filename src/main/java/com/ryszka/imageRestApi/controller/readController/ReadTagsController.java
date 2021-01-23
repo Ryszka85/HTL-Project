@@ -33,5 +33,10 @@ public class ReadTagsController {
         return tagService.getTagsLikeSearchTerm(term);
     }
 
+    @GetMapping
+    public List<TagDTO> getAllTags() {
+        return tagService.getAllTags();
+    }
+
 
 }
