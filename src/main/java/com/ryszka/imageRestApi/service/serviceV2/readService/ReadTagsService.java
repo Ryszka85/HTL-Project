@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 
 @Service
@@ -28,6 +29,13 @@ public class ReadTagsService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         ErrorMessages.INVALID_ARGUMENTS.getMessage()))
                 .stream()
+                .map(tagEntity -> new TagDTO(tagEntity.getTagId(), tagEntity.getTag()))
+                .collect(Collectors.toList());
+    }
+
+    public List<TagDTO> getAllTags() {
+        logger.info("Starting [ getAllTags() ] query ...");
+        return StreamSupport.stream(tagRepository.findAll().spliterator(), false)
                 .map(tagEntity -> new TagDTO(tagEntity.getTagId(), tagEntity.getTag()))
                 .collect(Collectors.toList());
     }

@@ -203,6 +203,10 @@ public class UpdateUserService {
                         ErrorMessages.NOT_FOUND_BY_EID.getMessage()));
         if (!this.bCryptPasswordEncoder.matches(request.getPassword(), userEntity.getPassword()))
             throw new EntityAccessNotAllowedException(ErrorMessages.INVALID_ARGUMENTS.getMessage());
+        userEntity.getImageEntities().forEach(imageEntity -> {
+            imageEntity.getTags().clear();
+            imageEntity.getUserLikesList().clear();
+        });
         this.userDAO.deleteUserAccount(userEntity);
 
     }

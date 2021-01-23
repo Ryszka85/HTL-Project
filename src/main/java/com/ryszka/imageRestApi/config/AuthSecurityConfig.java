@@ -95,6 +95,7 @@ public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/library/search-by/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/library/validate-image/").permitAll()
                 .antMatchers(HttpMethod.GET, "/query/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/tags/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/addresses/zip/cities/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/addresses/get/all/countries").permitAll()
                 .antMatchers(HttpMethod.GET, "/addresses/regions/**").permitAll()
