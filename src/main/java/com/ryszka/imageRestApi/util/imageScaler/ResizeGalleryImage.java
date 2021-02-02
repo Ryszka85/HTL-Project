@@ -36,6 +36,7 @@ public class ResizeGalleryImage implements ImageResizer{
             int newW = newDimension.get("X");
             double newHeight = height * 0.4;
             int newH = newDimension.get("Y");
+            System.out.println("Gallery image was resized " + width + " x " + height +  "\nto : " + newW + " x " + newH);
             try {
                 Thumbnails.of(read)
                         .size(newW, newH)
@@ -50,6 +51,10 @@ public class ResizeGalleryImage implements ImageResizer{
         } 
         return new byte[0];
     }
+
+     /*TODO: 13.01.2021 Implement simpler function -> forLoop is not needed ->
+     *  it is enough to calculate 600 / width or height */
+
 
     private Map<String, Integer> calcDimensions(int width, int height) {
         float adder = 0.1f;

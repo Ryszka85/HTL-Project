@@ -95,6 +95,7 @@ public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/library/search-by/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/library/validate-image/").permitAll()
                 .antMatchers(HttpMethod.GET, "/query/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/tags/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/addresses/zip/cities/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/addresses/get/all/countries").permitAll()
                 .antMatchers(HttpMethod.GET, "/addresses/regions/**").permitAll()
@@ -153,7 +154,8 @@ public class AuthSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://10.0.0.2:4200"));
+        /*configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://10.0.0.2:4200", "http://192.168.0.197:4200"));*/
+        configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization", "Cache-Control", "Content-Type", "withCredentials", "isMobile", "tokenRefresh"));
