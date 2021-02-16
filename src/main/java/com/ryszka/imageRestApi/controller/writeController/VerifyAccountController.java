@@ -1,22 +1,18 @@
-package com.ryszka.imageRestApi.service.serviceV2.writeService;
+package com.ryszka.imageRestApi.controller.writeController;
 
 import com.ryszka.imageRestApi.controller.readController.RedirectController;
 import com.ryszka.imageRestApi.dao.UserDAO;
 import com.ryszka.imageRestApi.errorHandling.EntityNotFoundException;
-import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
 import com.ryszka.imageRestApi.persistenceEntities.AccountVerificationTokenEntity;
 import com.ryszka.imageRestApi.persistenceEntities.UserEntity;
 import com.ryszka.imageRestApi.repository.AccountVerificationRepository;
 import com.ryszka.imageRestApi.security.AppConfigProperties;
 import com.ryszka.imageRestApi.security.JWTVerifier;
-import com.ryszka.imageRestApi.service.serviceV2.readService.UserAuthService;
 import com.ryszka.imageRestApi.viewModels.ShowTokenValidationResponse;
 import com.ryszka.imageRestApi.viewModels.request.TokenIdRequest;
-import com.ryszka.imageRestApi.viewModels.response.SignedUpUserDetailsResponse;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;

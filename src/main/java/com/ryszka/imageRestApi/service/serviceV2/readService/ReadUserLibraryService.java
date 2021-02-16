@@ -175,9 +175,14 @@ public class ReadUserLibraryService {
 
 
     public Optional<List<UserImageViewModel>> getImagesByTagNamePageable(GetImagesByTagRequest request, int pageReq) {
+        logger.info("starting [ getImagesByTagNamePageable ]...");
+        System.out.println(request.getTagName());
+
         Optional<TagEntity> resultOpt = this.tagDAO.getTagByName(request.getTagName());
+
         if (resultOpt.isEmpty()) return Optional.empty();
         TagEntity tagEntity = resultOpt.get();
+        System.out.println(tagEntity.getTag());
         // TODO: 15.09.2020 Implement pageable in this method -> call imageDAO.getImagesByTagName()
         //  and implement pageable in repository
         /*PageRequest pageRequest = PageRequest.of(5, 5);
@@ -201,6 +206,7 @@ public class ReadUserLibraryService {
 
         List<UserImageViewModel> userImageViewModels =
                 ObjectMapper.mapByStrategy(images, new ImageEntitiesToImageRespModels());
+        /*userImageViewModels.forEach(userImageViewModel -> System.out.println(userImageViewModel.getName()));*/
         return Optional.of(SortImageViewModels.sortRequest(request, userImageViewModels));
     }
 

@@ -13,11 +13,11 @@ public class AddressDTO implements Serializable {
     }
 
     public AddressDTO(UserRegistrationRequestModel requestModel) {
-        AddressDTO address = requestModel.getAddress();
-        this.street = address.getStreet();
+        /*AddressDTO address = requestModel.getAddress();*/
+        /*this.street = address.getStreet();
         this.zipcode = address.getZipcode();
         this.region = address.region;
-        this.city = address.city;
+        this.city = address.city;*/
     }
 
     public String getStreet() {

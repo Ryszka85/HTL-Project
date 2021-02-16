@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Async;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Entity(name = "tags")
@@ -24,7 +25,10 @@ public class TagEntity implements Serializable {
     public TagEntity() {
     }
 
-
+    public TagEntity(String tag) {
+        this.tag = tag;
+        this.tagId = UUID.randomUUID().toString();
+    }
 
     public String getTagId() {
         return tagId;

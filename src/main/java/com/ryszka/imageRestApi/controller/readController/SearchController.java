@@ -37,6 +37,7 @@ public class SearchController {
         Class<String>[] argsClass = new Class[params.length];
         Arrays.fill(argsClass, String.class);
         Method method = SearchService.class.getDeclaredMethod(pMethod, argsClass);
+        System.out.println(params);
         return ResponseEntity.ok(method.invoke(searchService, params));
     }
 }

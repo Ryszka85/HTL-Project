@@ -35,7 +35,8 @@ public class SearchService {
 
     public List<TagDTO> searchByTag(String tag) {
         logger.info("Preparing search by tag ..");
-        return readTagsService.getTagsLikeSearchTerm(tag);
+        List<TagDTO> tagsLikeSearchTerm = readTagsService.getTagsLikeSearchTerm(tag);
+        return tagsLikeSearchTerm;
     }
 
     public List<UserDetailsResponseModel> searchUsers(String email) {

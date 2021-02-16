@@ -1,18 +1,19 @@
 package com.ryszka.imageRestApi.service.serviceV2.writeService;
 
-import com.google.api.client.util.IOUtils;
 import com.ryszka.imageRestApi.config.FireBaseStorageConfig;
 import com.ryszka.imageRestApi.dao.ImageDAO;
+import com.ryszka.imageRestApi.dao.TagDAO;
 import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
 import com.ryszka.imageRestApi.persistenceEntities.ImageDetailsEntity;
 import com.ryszka.imageRestApi.persistenceEntities.ImageEntity;
+import com.ryszka.imageRestApi.persistenceEntities.TagEntity;
 import com.ryszka.imageRestApi.repository.GoogleCloudRepository;
-import com.ryszka.imageRestApi.security.AppPossibleLibraryResolutions;
+import com.ryszka.imageRestApi.repository.TagRepository;
 import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.repository.ImageRepository;
-import com.ryszka.imageRestApi.util.imageScaler.*;
 import com.ryszka.imageRestApi.util.mapper.ObjectMapper;
 import com.ryszka.imageRestApi.util.mapper.mapStrategies.ImageDtoToImageEntity;
+import com.ryszka.imageRestApi.viewModels.ImageDetailsList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,14 +23,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.sql.Date;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class DatabaseAndFTPStorageService {
@@ -38,18 +37,21 @@ public class DatabaseAndFTPStorageService {
     private final ImageRepository imageRepository;
     private final TransactionTemplate transactionTemplate;
     private final ImageDAO imageDAO;
+    private TagDAO tagDao;
     private final FireBaseStorageConfig storageConfig;
     private final GoogleCloudRepository cloudRepository;
 
     public DatabaseAndFTPStorageService(ImageRepository imageRepository,
                                         TransactionTemplate transactionTemplate,
                                         ImageDAO imageDAO, FireBaseStorageConfig storageConfig,
-                                        GoogleCloudRepository cloudRepository) {
+                                        GoogleCloudRepository cloudRepository,
+                                        TagDAO tagDAO) {
         this.imageRepository = imageRepository;
         this.transactionTemplate = transactionTemplate;
         this.imageDAO = imageDAO;
         this.storageConfig = storageConfig;
         this.cloudRepository = cloudRepository;
+        this.tagDao = tagDAO;
     }
 
     /*public DatabaseAndFTPStorageService(ImageRepository imageRepository,
@@ -70,7 +72,9 @@ public class DatabaseAndFTPStorageService {
         this.imageDAO = imageDAO;
     }*/
 
-    public void storeToDbAndFTPInTransaction(ImageDTO imageDTO) {
+    public void storeToDbAndFTPInTransaction(ImageDTO imageDTO,
+                                             TagDAO tagDAO) {
+        this.tagDao = tagDAO;
         transactionTemplate.execute(savFile(imageDTO));
     }
 
@@ -86,11 +90,28 @@ public class DatabaseAndFTPStorageService {
                 );*/
                 /*imageScaler.scaleDown(imageDTO.getInputStream())*/
 
-                List<ImageDetailsEntity> imageDetailsEntityList = new ArrayList<>();
-
                 BufferedImage bi = ImageIO.read(imageDTO.getInputStream());
                 ImageEntity imageEntity = ObjectMapper.mapByStrategy(imageDTO, new ImageDtoToImageEntity());
-                imageDetailsEntityList.add(new ImageDetailsEntity(
+
+                List<ImageDetailsEntity> imageDetailsEntityList = new ArrayList<>();
+
+                ImageDetailsList imageDetailsList = new ImageDetailsList();
+                List<GoogleUploadTask> saveTasks = new ArrayList<>();
+                saveTasks.add(new SaveOriginalImg(
+                        cloudRepository,
+                        imageDetailsList,
+                        imageDTO,
+                        bi,
+                        imageEntity));
+
+                saveTasks.add(new SaveOriginalImg(cloudRepository, imageDetailsList, imageDTO, bi, imageEntity));
+                saveTasks.add(new SaveDownloadViewImg(cloudRepository, imageDTO));
+                saveTasks.add(new SaveGalleryImg(cloudRepository, imageDTO, bi));
+                saveTasks.add(new SaveAndResizeDownloadImg(cloudRepository, bi, imageDetailsList, imageDTO, imageEntity));
+                new GoogleUploadTaskProcessor(saveTasks)
+                        .processTasks();
+
+                /*imageDetailsEntityList.add(new ImageDetailsEntity(
                         bi.getWidth(),
                         bi.getHeight(),
                         imageDTO.getFile().getContentType(),
@@ -99,7 +120,7 @@ public class DatabaseAndFTPStorageService {
 
                 cloudRepository.storeImage("original/" + imageDTO.getPath(), imageDTO.getName(), imageDTO.getContent());
 
-                /*ImageResizer galleryScaler = new ResizeDownForGallery(imageDTO.getContentGalleryFile());*/
+                *//*ImageResizer galleryScaler = new ResizeDownForGallery(imageDTO.getContentGalleryFile());*//*
                 byte[] bytes = imageDTO.getContent();
                 ImageResizer galleryScaler = new ResizeGalleryImage(bi.getWidth(), bi.getHeight(), bytes);
                 byte[] galleryContent = galleryScaler.resize();
@@ -119,7 +140,7 @@ public class DatabaseAndFTPStorageService {
                         logger.info("Starting to resize image " + width + "...");
                         byte[] content1 = imageDTO.getContent();
                         ImageResizer imgScaler = new ResizeDownByWidthForDownload(content1, width);
-                        /*BufferedImage read = ImageIO.read(new ByteArrayInputStream(imageDTO.getContent()));*/
+                        *//*BufferedImage read = ImageIO.read(new ByteArrayInputStream(imageDTO.getContent()));*//*
 
                         if (bi.getWidth() > width) {
                             byte[] downloadContent = imgScaler.resize();
@@ -144,7 +165,7 @@ public class DatabaseAndFTPStorageService {
                         logger.info("Starting scaling image " + height + "...");
                         byte[] content1 = imageDTO.getContent();
                         ImageResizer imgScaler = new ResizeDownByHeightForDownload(content1, height);
-                        /*BufferedImage read = ImageIO.read(new ByteArrayInputStream(imageDTO.getContent()));*/
+                        *//*BufferedImage read = ImageIO.read(new ByteArrayInputStream(imageDTO.getContent()));*//*
 
                         if (bi.getHeight() > height) {
                             byte[] downloadContent = imgScaler.resize();
@@ -165,12 +186,44 @@ public class DatabaseAndFTPStorageService {
                                     downloadContent);
                         }
                     }
-                }
-                imageEntity.setImageDetailsEntities(imageDetailsEntityList);
+                }*/
+
+
+                /*imageEntity.setImageDetailsEntities(imageDetailsEntityList);*/
+
+                imageEntity.setImageDetailsEntities(imageDetailsList.getDetailList());
+
+
                 /*DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
                 LocalDate now = LocalDate.now();*/
 
                 imageEntity.setUploadDate(Date.valueOf(LocalDate.now()));
+
+                List<TagEntity> tagEntities = this.tagDao
+                        .findAllByTag(imageDTO.getTagList());
+                List<TagEntity> newTagNames = new ArrayList<>();
+                if (tagEntities.size() > 0) {
+                    Predicate<String> filteredNewTags = tagName -> tagEntities.stream()
+                            .anyMatch(tagEntity -> !tagEntity
+                                    .getTag()
+                                    .equals(tagName));
+                    newTagNames = imageDTO
+                            .getTagList()
+                            .stream()
+                            .filter(filteredNewTags)
+                            .map(TagEntity::new)
+                            .collect(Collectors.toList());
+                    this.tagDao.saveAllTags(newTagNames);
+                } else {
+                    newTagNames = imageDTO.getTagList()
+                            .stream()
+                            .map(TagEntity::new)
+                            .collect(Collectors.toList());
+                    this.tagDao.saveAllTags(newTagNames);
+                }
+
+                imageEntity.setTags(newTagNames);
+                /*imageEntity.setTags();*/
                 logger.info("Starting storing file " + imageDTO.getName() + " to db...");
                 dbStoreStatus = imageDAO.saveImage(imageEntity);
                 logger.info("Finished storing file " + imageDTO.getName() + " to db...");

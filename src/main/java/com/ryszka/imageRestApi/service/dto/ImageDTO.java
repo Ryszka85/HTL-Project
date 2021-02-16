@@ -11,7 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ImageDTO {
     private String name, path, profileImgPath, username, userId, imageId, email, link, tagId, tag;
@@ -25,6 +27,7 @@ public class ImageDTO {
     private MultipartFile file, galleryFile, downloadFile;
     private String urlReference;
     private boolean isPublic;
+    private List<String> tagList;
     private InputStream inputStream, inputStreamGalleryFile, inputStreamDownloadFile;
     List<TagEntity> tagEntities;
 
@@ -35,6 +38,10 @@ public class ImageDTO {
         this(request.getUserId(), request.getFile(), request.getGalleryFile(), request.getDownloadFile());
         this.isPublic = request.getIsPublic().equals("true");
         this.urlReference = request.getUrlReference();
+        if (!request.getTags().isEmpty() && request.getTags() != null)
+            this.tagList = Arrays.stream(request.getTags()
+                    .split("-"))
+                    .collect(Collectors.toList());
     }
 
     public ImageDTO(String userId, MultipartFile file, MultipartFile galleryFile, MultipartFile downloadFile) {
@@ -138,6 +145,14 @@ public class ImageDTO {
         this.link = link;
         this.content = null;
         this.tags = tags;
+    }
+
+    public List<String> getTagList() {
+        return tagList;
+    }
+
+    public void setTagList(List<String> tagList) {
+        this.tagList = tagList;
     }
 
     public byte[] getContentDownloadFile() {

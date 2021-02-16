@@ -66,13 +66,18 @@ public class ReadFromLibraryController {
     }
 
     @PostMapping(value = "tag/")
-    public ResponseEntity<Optional<List<UserImageViewModel>>> test(@RequestBody GetImagesByTagRequest request) {
+    public ResponseEntity<List<UserImageViewModel>> test(@RequestBody GetImagesByTagRequest request) {
         System.out.println("Hallo");
         System.out.println("foo");
         Optional<List<UserImageViewModel>> output = this.readService
-                .getImagesByTagNamePageable(request, 0);
-        return validateQueryAndGetResponse(output,
-                ErrorMessages.IMAGES_NOT_FOUND_BY_TAG);
+                .
+                        getImagesByTagNamePageable(request, 0);
+        output.ifPresent(userImageViewModels ->
+                userImageViewModels
+                        .forEach(userImageViewModel -> System.out.println(userImageViewModel.getName())));
+        /*return validateQueryAndGetResponse(output,
+                ErrorMessages.IMAGES_NOT_FOUND_BY_TAG);*/
+        return ResponseEntity.ok(output.get());
     }
 
     public static ResponseEntity<Optional<List<UserImageViewModel>>> validateQueryAndGetResponse(
