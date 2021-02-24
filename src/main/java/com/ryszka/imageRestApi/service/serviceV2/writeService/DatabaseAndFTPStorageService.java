@@ -97,12 +97,12 @@ public class DatabaseAndFTPStorageService {
 
                 ImageDetailsList imageDetailsList = new ImageDetailsList();
                 List<GoogleUploadTask> saveTasks = new ArrayList<>();
-                saveTasks.add(new SaveOriginalImg(
+                /*saveTasks.add(new SaveOriginalImg(
                         cloudRepository,
                         imageDetailsList,
                         imageDTO,
                         bi,
-                        imageEntity));
+                        imageEntity));*/
 
                 saveTasks.add(new SaveOriginalImg(cloudRepository, imageDetailsList, imageDTO, bi, imageEntity));
                 saveTasks.add(new SaveDownloadViewImg(cloudRepository, imageDTO));
@@ -199,6 +199,9 @@ public class DatabaseAndFTPStorageService {
 
                 imageEntity.setUploadDate(Date.valueOf(LocalDate.now()));
 
+
+                // TODO: 16.02.2021 Change save tags because duplicate tags occur in database!!! 
+                
                 List<TagEntity> tagEntities = this.tagDao
                         .findAllByTag(imageDTO.getTagList());
                 List<TagEntity> newTagNames = new ArrayList<>();
@@ -207,22 +210,34 @@ public class DatabaseAndFTPStorageService {
                             .anyMatch(tagEntity -> !tagEntity
                                     .getTag()
                                     .equals(tagName));
-                    newTagNames = imageDTO
+                    /*newTagNames = imageDTO
                             .getTagList()
                             .stream()
                             .filter(filteredNewTags)
                             .map(TagEntity::new)
+                            .collect(Collectors.toList());*/
+                    System.out.println(newTagNames.size());
+
+                    newTagNames = imageDTO.getTagList()
+                            .stream()
+                            .filter(newTag -> !tagEntities.contains(newTag))
+                            .map(newTag -> new TagEntity(newTag))
                             .collect(Collectors.toList());
-                    this.tagDao.saveAllTags(newTagNames);
+
+                    List<TagEntity> allByTag = this.tagDao.findAllByTag(imageDTO.getTagList());
+
+                    imageEntity.setTags(allByTag);
+                    /*this.tagDao.saveAllTags(newTagNames);*/
                 } else {
                     newTagNames = imageDTO.getTagList()
                             .stream()
                             .map(TagEntity::new)
                             .collect(Collectors.toList());
-                    this.tagDao.saveAllTags(newTagNames);
+                    /*this.tagDao.saveAllTags(newTagNames);*/
+                    imageEntity.setTags(newTagNames);
                 }
 
-                imageEntity.setTags(newTagNames);
+
                 /*imageEntity.setTags();*/
                 logger.info("Starting storing file " + imageDTO.getName() + " to db...");
                 dbStoreStatus = imageDAO.saveImage(imageEntity);
