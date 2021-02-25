@@ -1,5 +1,9 @@
 package com.ryszka.imageRestApi.util.imageScaler;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
 import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +40,25 @@ public class ResizeGalleryImage implements ImageResizer{
             int newW = newDimension.get("X");
             double newHeight = height * 0.4;
             int newH = newDimension.get("Y");
-            System.out.println("Gallery image was resized " + width + " x " + height +  "\nto : " + newW + " x " + newH);
+
+            Metadata metadata = ImageMetadataReader.readMetadata(new ByteArrayInputStream(content));
+
             try {
+
+
+            if (rotateImage(metadata)) {
+                logger.info("Need to rotate image..");
+                Thumbnails.of(read)
+                        .size(newW, newH)
+                        .keepAspectRatio(true)
+                        .rotate(90)
+                        .outputFormat("jpg")
+                        .toOutputStream(baos);
+                System.out.println("Gallery image was resized " + width + " x " + height +  "\nto : " + newW + " x " + newH);
+                return baos.toByteArray();
+            } else {
+                System.out.println("Gallery image was resized " + width + " x " + height +  "\nto : " + newW + " x " + newH);
+
                 Thumbnails.of(read)
                         .size(newW, newH)
                         .keepAspectRatio(true)
@@ -45,14 +66,32 @@ public class ResizeGalleryImage implements ImageResizer{
                         .toOutputStream(baos);
                 logger.info("Finished resizing image " + newWidth + "x" + height);
                 return baos.toByteArray();
+            }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } 
+        } catch (ImageProcessingException e) {
+            e.printStackTrace();
+        }
         return new byte[0];
     }
 
-     /*TODO: 13.01.2021 Implement simpler function -> forLoop is not needed ->
+    private boolean rotateImage(Metadata metadata) {
+        for (Directory directory : metadata.getDirectories()) {
+            if (directory.getName().equals("Exif IFD0")) {
+                return directory.getTags()
+                        .stream()
+                        .filter(tag -> tag.getTagName().equals("Orientation"))
+                        .map(tag -> tag.getDescription().split(","))
+                        .filter(strings -> !strings[0].equals("Top") && !strings[1].equals("left side (Horizontal / normal)"))
+                        .count() > 0;
+            }
+        }
+        return false;
+    }
+
+    /*TODO: 13.01.2021 Implement simpler function -> forLoop is not needed ->
      *  it is enough to calculate 600 / width or height */
 
 

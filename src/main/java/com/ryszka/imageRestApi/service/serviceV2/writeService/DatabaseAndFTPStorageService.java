@@ -1,5 +1,9 @@
 package com.ryszka.imageRestApi.service.serviceV2.writeService;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.Tag;
 import com.ryszka.imageRestApi.config.FireBaseStorageConfig;
 import com.ryszka.imageRestApi.dao.ImageDAO;
 import com.ryszka.imageRestApi.dao.TagDAO;
@@ -96,6 +100,7 @@ public class DatabaseAndFTPStorageService {
                 );*/
                 /*imageScaler.scaleDown(imageDTO.getInputStream())*/
 
+
                 BufferedImage bi = ImageIO.read(imageDTO.getInputStream());
                 ImageEntity imageEntity = ObjectMapper.mapByStrategy(imageDTO, new ImageDtoToImageEntity());
 
@@ -128,6 +133,8 @@ public class DatabaseAndFTPStorageService {
                         imageDTO.getFile().getContentType(),
                         imageDTO.getFile().getSize(),
                         imageEntity));
+
+
 
                 new Thread(() -> {
 
