@@ -1,7 +1,14 @@
 package com.ryszka.imageRestApi.controller.readController;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.Tag;
 import com.ryszka.imageRestApi.errorHandling.ErrorMessages;
 import com.ryszka.imageRestApi.service.serviceV2.readService.ImageRecognitionService;
+import net.coobird.thumbnailator.Thumbnailator;
+import net.coobird.thumbnailator.Thumbnails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +24,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping(value = "library")
@@ -33,7 +42,7 @@ public class ValidateImageController {
     private final Logger logger = LoggerFactory.getLogger(ValidateImageController.class);
 
     @PostMapping(value = "validate-image")
-    public ValidateImageResponse validateImage(@RequestBody MultipartFile file) throws IOException {
+    public ValidateImageResponse validateImage(@RequestBody MultipartFile file) throws IOException, ImageProcessingException {
 
 
         /*String url = "http://212.186.15.55:8080/getlabels/";
@@ -73,6 +82,7 @@ public class ValidateImageController {
 
 
         System.out.println(s);*/
+
 
         BufferedImage image = ImageIO.read(file.getInputStream());
         logger.info("Starting to validate image " +

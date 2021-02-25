@@ -153,6 +153,8 @@
     <orderEntry type="library" name="Maven: com.google.api-client:google-api-client:1.30.11" level="project" />
     <orderEntry type="library" name="Maven: com.google.oauth-client:google-oauth-client:1.31.1" level="project" />
     <orderEntry type="library" name="Maven: com.google.http-client:google-http-client-jackson2:1.37.0" level="project" />
+    <orderEntry type="library" name="Maven: com.drewnoakes:metadata-extractor:2.15.0" level="project" />
+    <orderEntry type="library" name="Maven: com.adobe.xmp:xmpcore:6.0.6" level="project" />
     <orderEntry type="library" name="Maven: net.coobird:thumbnailator:0.4.12" level="project" />
     <orderEntry type="library" name="Maven: org.reflections:reflections:0.9.12" level="project" />
     <orderEntry type="library" name="Maven: org.javassist:javassist:3.26.0-GA" level="project" />
