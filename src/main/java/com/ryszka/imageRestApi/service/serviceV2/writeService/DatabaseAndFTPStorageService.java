@@ -9,8 +9,10 @@ import com.ryszka.imageRestApi.persistenceEntities.ImageEntity;
 import com.ryszka.imageRestApi.persistenceEntities.TagEntity;
 import com.ryszka.imageRestApi.repository.GoogleCloudRepository;
 import com.ryszka.imageRestApi.repository.TagRepository;
+import com.ryszka.imageRestApi.security.AppPossibleLibraryResolutions;
 import com.ryszka.imageRestApi.service.dto.ImageDTO;
 import com.ryszka.imageRestApi.repository.ImageRepository;
+import com.ryszka.imageRestApi.util.imageScaler.*;
 import com.ryszka.imageRestApi.util.mapper.ObjectMapper;
 import com.ryszka.imageRestApi.util.mapper.mapStrategies.ImageDtoToImageEntity;
 import com.ryszka.imageRestApi.viewModels.ImageDetailsList;
@@ -23,10 +25,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -104,12 +110,33 @@ public class DatabaseAndFTPStorageService {
                         bi,
                         imageEntity));*/
 
-                saveTasks.add(new SaveOriginalImg(cloudRepository, imageDetailsList, imageDTO, bi, imageEntity));
+
+
+                /*saveTasks.add(new SaveOriginalImg(cloudRepository, imageDetailsList, imageDTO, bi, imageEntity));
                 saveTasks.add(new SaveDownloadViewImg(cloudRepository, imageDTO));
                 saveTasks.add(new SaveGalleryImg(cloudRepository, imageDTO, bi));
                 saveTasks.add(new SaveAndResizeDownloadImg(cloudRepository, bi, imageDetailsList, imageDTO, imageEntity));
                 new GoogleUploadTaskProcessor(saveTasks)
-                        .processTasks();
+                        .processTasks();*/
+
+
+                List<Runnable> runnables = new ArrayList<>();
+
+                imageDetailsList.addDetail(new ImageDetailsEntity(
+                        bi.getWidth(),
+                        bi.getHeight(),
+                        imageDTO.getFile().getContentType(),
+                        imageDTO.getFile().getSize(),
+                        imageEntity));
+
+                new Thread(() -> {
+
+                    try {
+                        cloudRepository.storeImage("original/" + imageDTO.getPath(), imageDTO.getName(), imageDTO.getContent());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
 
                 /*imageDetailsEntityList.add(new ImageDetailsEntity(
                         bi.getWidth(),
@@ -118,29 +145,87 @@ public class DatabaseAndFTPStorageService {
                         imageDTO.getFile().getSize(),
                         imageEntity));
 
-                cloudRepository.storeImage("original/" + imageDTO.getPath(), imageDTO.getName(), imageDTO.getContent());
+                cloudRepository.storeImage("original/" + imageDTO.getPath(), imageDTO.getName(), imageDTO.getContent());*/
 
-                *//*ImageResizer galleryScaler = new ResizeDownForGallery(imageDTO.getContentGalleryFile());*//*
-                byte[] bytes = imageDTO.getContent();
+                /*ImageResizer galleryScaler = new ResizeDownForGallery(imageDTO.getContentGalleryFile());*/
+
+                new Thread(() -> {
+                    byte[] bytes = imageDTO.getContent();
+                    ImageResizer galleryScaler = new ResizeGalleryImage(bi.getWidth(), bi.getHeight(), bytes);
+                    byte[] galleryContent = new byte[0];
+                    try {
+                        galleryContent = galleryScaler.resize();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        cloudRepository.storeImage(
+                                "gallery" + "/" + imageDTO.getPath(),
+                                imageDTO.getName(),
+                                galleryContent);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+                /*byte[] bytes = imageDTO.getContent();
                 ImageResizer galleryScaler = new ResizeGalleryImage(bi.getWidth(), bi.getHeight(), bytes);
                 byte[] galleryContent = galleryScaler.resize();
                 cloudRepository.storeImage(
                         "gallery" + "/" + imageDTO.getPath(),
                         imageDTO.getName(),
-                        galleryContent);
+                        galleryContent);*/
 
-                cloudRepository.storeImage(
+                new Thread(() -> {
+                    try {
+                        cloudRepository.storeImage(
+                                "downloadView" + "/" + imageDTO.getPath(),
+                                imageDTO.getName(),
+                                imageDTO.getContentDownloadFile());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+
+                /*cloudRepository.storeImage(
                         "downloadView" + "/" + imageDTO.getPath(),
                         imageDTO.getName(),
-                        imageDTO.getContentDownloadFile());
+                        imageDTO.getContentDownloadFile());*/
 
 
                 if (bi.getWidth() > bi.getHeight()) {
                     for (int width : AppPossibleLibraryResolutions.WIDTH_LIST.getResolutions()) {
-                        logger.info("Starting to resize image " + width + "...");
+                        runnables.add(() -> {
+                            logger.info("Starting to resize image " + width + "...");
+                            byte[] content1 = imageDTO.getContent();
+                            ImageResizer imgScaler = new ResizeDownByWidthForDownload(content1, width);
+                            try {
+                                BufferedImage read = ImageIO.read(new ByteArrayInputStream(imageDTO.getContent()));
+                                if (bi.getWidth() > width) {
+                                    byte[] downloadContent = imgScaler.resize();
+                                    // generating file details
+                                    BufferedImage temp = ImageIO.read(new ByteArrayInputStream(downloadContent));
+                                    imageDetailsList.addDetail(new ImageDetailsEntity(
+                                            width,
+                                            temp.getHeight(),
+                                            imageDTO.getFile().getContentType(),
+                                            downloadContent.length,
+                                            imageEntity));
+
+                                    // store file to cloud
+                                    cloudRepository.storeImage(
+                                            "download/landscape/" + width + "/" + imageDTO.getPath(),
+                                            imageDTO.getName(),
+                                            downloadContent);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                        });
+                        /*logger.info("Starting to resize image " + width + "...");
                         byte[] content1 = imageDTO.getContent();
                         ImageResizer imgScaler = new ResizeDownByWidthForDownload(content1, width);
-                        *//*BufferedImage read = ImageIO.read(new ByteArrayInputStream(imageDTO.getContent()));*//*
+                        BufferedImage read = ImageIO.read(new ByteArrayInputStream(imageDTO.getContent()));
 
                         if (bi.getWidth() > width) {
                             byte[] downloadContent = imgScaler.resize();
@@ -158,14 +243,45 @@ public class DatabaseAndFTPStorageService {
                                     "download/landscape/" + width + "/" + imageDTO.getPath(),
                                     imageDTO.getName(),
                                     downloadContent);
-                        }
+                        }*/
                     }
                 } else {
                     for (int height : AppPossibleLibraryResolutions.HEIGHT_LIST.getResolutions()) {
-                        logger.info("Starting scaling image " + height + "...");
+                        System.out.println(height);
+                        runnables.add(() -> {
+                            logger.info("Starting scaling image " + height + "...");
+                            byte[] content1 = imageDTO.getContent();
+                            ImageResizer imgScaler = new ResizeDownByHeightForDownload(content1, height);
+                            try {
+                                BufferedImage read = ImageIO.read(new ByteArrayInputStream(imageDTO.getContent()));
+                                if (bi.getHeight() > height) {
+                                    byte[] downloadContent = imgScaler.resize();
+                                    // generating file details
+                                    BufferedImage temp = ImageIO.read(new ByteArrayInputStream(downloadContent));
+                                    System.out.println(height);
+                                    imageDetailsList.addDetail(new ImageDetailsEntity(
+                                            temp.getWidth(),
+                                            height,
+                                            imageDTO.getFile().getContentType(),
+                                            downloadContent.length,
+                                            imageEntity));
+
+                                    // store file to cloud
+                                    cloudRepository.storeImage(
+                                            "download/portrait/" + height + "/" + imageDTO.getPath(),
+                                            imageDTO.getName(),
+                                            downloadContent);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+
+                        });
+                        /*logger.info("Starting scaling image " + height + "...");
                         byte[] content1 = imageDTO.getContent();
                         ImageResizer imgScaler = new ResizeDownByHeightForDownload(content1, height);
-                        *//*BufferedImage read = ImageIO.read(new ByteArrayInputStream(imageDTO.getContent()));*//*
+                        BufferedImage read = ImageIO.read(new ByteArrayInputStream(imageDTO.getContent()));
 
                         if (bi.getHeight() > height) {
                             byte[] downloadContent = imgScaler.resize();
@@ -184,9 +300,29 @@ public class DatabaseAndFTPStorageService {
                                     "download/portrait/" + height + "/" + imageDTO.getPath(),
                                     imageDTO.getName(),
                                     downloadContent);
-                        }
+                        }*/
                     }
-                }*/
+                }
+
+
+                AtomicInteger index = new AtomicInteger(0);
+                CountDownLatch latch = new CountDownLatch(3);
+                System.out.println(runnables.size());
+                for (int i = 0; i < 3; i++) {
+                    new Thread(() -> {
+                        int tempIndex = index.getAndIncrement();
+                        while (tempIndex < (runnables).size()) {
+                            runnables.get(tempIndex).run();
+                            tempIndex = index.getAndIncrement();
+                        }
+                        latch.countDown();
+                    }).start();
+                }
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
 
                 /*imageEntity.setImageDetailsEntities(imageDetailsEntityList);*/
@@ -201,21 +337,11 @@ public class DatabaseAndFTPStorageService {
 
 
                 // TODO: 16.02.2021 Change save tags because duplicate tags occur in database!!! 
-                
+
                 List<TagEntity> tagEntities = this.tagDao
                         .findAllByTag(imageDTO.getTagList());
                 List<TagEntity> newTagNames = new ArrayList<>();
                 if (tagEntities.size() > 0) {
-                    Predicate<String> filteredNewTags = tagName -> tagEntities.stream()
-                            .anyMatch(tagEntity -> !tagEntity
-                                    .getTag()
-                                    .equals(tagName));
-                    /*newTagNames = imageDTO
-                            .getTagList()
-                            .stream()
-                            .filter(filteredNewTags)
-                            .map(TagEntity::new)
-                            .collect(Collectors.toList());*/
                     System.out.println(newTagNames.size());
 
                     newTagNames = imageDTO.getTagList()
@@ -223,6 +349,8 @@ public class DatabaseAndFTPStorageService {
                             .filter(newTag -> !tagEntities.contains(newTag))
                             .map(newTag -> new TagEntity(newTag))
                             .collect(Collectors.toList());
+
+                    /*this.tagDao.saveAllTags(newTagNames);*/
 
                     List<TagEntity> allByTag = this.tagDao.findAllByTag(imageDTO.getTagList());
 
