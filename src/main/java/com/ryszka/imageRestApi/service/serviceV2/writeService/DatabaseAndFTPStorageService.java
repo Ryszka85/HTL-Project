@@ -345,31 +345,34 @@ public class DatabaseAndFTPStorageService {
 
                 // TODO: 16.02.2021 Change save tags because duplicate tags occur in database!!! 
 
-                List<TagEntity> tagEntities = this.tagDao
-                        .findAllByTag(imageDTO.getTagList());
-                List<TagEntity> newTagNames = new ArrayList<>();
-                if (tagEntities.size() > 0) {
-                    System.out.println(newTagNames.size());
+                if (!imageDTO.getTagList().isEmpty()) {
 
-                    newTagNames = imageDTO.getTagList()
-                            .stream()
-                            .filter(newTag -> !tagEntities.contains(newTag))
-                            .map(newTag -> new TagEntity(newTag))
-                            .collect(Collectors.toList());
+                    List<TagEntity> tagEntities = this.tagDao
+                            .findAllByTag(imageDTO.getTagList());
+                    List<TagEntity> newTagNames = new ArrayList<>();
+                    if (tagEntities.size() > 0) {
+                        System.out.println(newTagNames.size());
 
-                    /*this.tagDao.saveAllTags(newTagNames);*/
+                        newTagNames = imageDTO.getTagList()
+                                .stream()
+                                .filter(newTag -> !tagEntities.contains(newTag))
+                                .map(newTag -> new TagEntity(newTag))
+                                .collect(Collectors.toList());
 
-                    List<TagEntity> allByTag = this.tagDao.findAllByTag(imageDTO.getTagList());
+                        /*this.tagDao.saveAllTags(newTagNames);*/
 
-                    imageEntity.setTags(allByTag);
-                    /*this.tagDao.saveAllTags(newTagNames);*/
-                } else {
-                    newTagNames = imageDTO.getTagList()
-                            .stream()
-                            .map(TagEntity::new)
-                            .collect(Collectors.toList());
-                    /*this.tagDao.saveAllTags(newTagNames);*/
-                    imageEntity.setTags(newTagNames);
+                        List<TagEntity> allByTag = this.tagDao.findAllByTag(imageDTO.getTagList());
+
+                        imageEntity.setTags(allByTag);
+                        /*this.tagDao.saveAllTags(newTagNames);*/
+                    } else {
+                        newTagNames = imageDTO.getTagList()
+                                .stream()
+                                .map(TagEntity::new)
+                                .collect(Collectors.toList());
+                        /*this.tagDao.saveAllTags(newTagNames);*/
+                        imageEntity.setTags(newTagNames);
+                    }
                 }
 
 

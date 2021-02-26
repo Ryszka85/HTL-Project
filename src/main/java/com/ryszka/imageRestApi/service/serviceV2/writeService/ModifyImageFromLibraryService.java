@@ -52,7 +52,6 @@ public class ModifyImageFromLibraryService {
     }
 
 
-
     @Transactional
     public void deleteImageFromLibrary(UserImageViewModel request) {
 
@@ -83,6 +82,36 @@ public class ModifyImageFromLibraryService {
                 ErrorMessages.INVALID_ARGUMENTS.getMessage());
     }
 
+    public void deleteTagsFromImage(ImageDTO imageDTO) {
+        System.out.println(imageDTO);
+        if (imageDTO != null &&
+                imageDTO.getTags() != null &&
+                imageDTO.getUserId() != null) {
+            UserEntity userEntity = getUserEntityOrThrow(imageDTO.getUserId());
+            ImageEntity imageEntity = getImageEntityOrThrow(imageDTO);
+            imageEntity.setUserEntity(userEntity);
+
+            List<String> tagIDs = mapToIdList(imageDTO);
+            List<TagEntity> tagEntities = getTagEntitiesOrThrow(tagIDs);
+            List<TagEntity> filteredTagList = imageEntity.getTags()
+                    .stream()
+                    .filter(tagEntity -> tagEntities.stream()
+                            .filter(tagEntity1 -> tagEntity1.getTagId()
+                                    .equals(tagEntity.getTagId()))
+                            .count() == 0)
+                    .collect(Collectors.toList());
+            filteredTagList.forEach(System.out::println);
+            imageEntity.setTags(filteredTagList);
+            imageDAO.saveImage(imageEntity);
+            /*List<String> tagIDs = mapToIdList(imageDTO);
+            getTagEntitiesOrThrow(tagIDs).forEach(tagEntity ->
+                    imageEntity.getTags().add(tagEntity));
+            imageDAO.saveImage(imageEntity);*/
+        } else throw new IllegalArgumentException(
+                ErrorMessages.INVALID_ARGUMENTS.getMessage());
+
+    }
+
 
     private List<String> mapToIdList(ImageDTO imageDTO) {
         return imageDTO.getTags()
@@ -108,4 +137,6 @@ public class ModifyImageFromLibraryService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         ErrorMessages.NOT_FOUND_BY_EID.getMessage()));
     }
+
+
 }
