@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,11 +43,16 @@ public class ImageRecognitionService {
                 headers
         );
         logger.info("Starting to call imageRecognition service.....");
-        List<String> fetchedTags = restTemplate.exchange(
-                AppConfigProperties.IMAGE_RECOGNITION_SERVICE_URL,
-                HttpMethod.POST,
-                entity,
-                List.class).getBody();
+        List<String> fetchedTags = null;
+        try {
+            fetchedTags = restTemplate.exchange(
+                    AppConfigProperties.IMAGE_RECOGNITION_SERVICE_URL,
+                    HttpMethod.POST,
+                    entity,
+                    List.class).getBody();
+        } catch (RestClientException e) {
+            throw new IOException("Failed to fetch image recognition service");
+        }
         logger.info("Finished request imageRecognition service.....");
         return new ImageRecognitionTagsResponse(
                 fetchedTags.stream()
