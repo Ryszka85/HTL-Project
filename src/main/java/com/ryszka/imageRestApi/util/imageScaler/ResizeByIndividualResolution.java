@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public class ResizeByIndividualResolution implements ImageResizer{
+public class ResizeByIndividualResolution implements ImageResizer {
     private final Logger logger =
             LoggerFactory.getLogger(ResizeByIndividualResolution.class);
     private int width;

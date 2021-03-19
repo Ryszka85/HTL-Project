@@ -154,6 +154,7 @@ public class ReadUserLibraryService {
                 boolean isMobile = isMobileHeaderVal == 1;
 
 
+
                 String imgPath = userEntity.getUserId() + "/" + response.getName();
                 String path = "downloadView/" + imgPath;
                 logger.info("Generating path for request : {}", path);

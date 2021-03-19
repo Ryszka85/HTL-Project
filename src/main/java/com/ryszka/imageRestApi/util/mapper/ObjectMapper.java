@@ -5,6 +5,7 @@ import com.ryszka.imageRestApi.util.mapper.mapStrategies.MapStrategy;
 import java.util.List;
 
 public class ObjectMapper {
+
     public static <T,U> U mapByStrategy(T source, MapStrategy<T, U> strategy) {
         return strategy.map(source);
     }
