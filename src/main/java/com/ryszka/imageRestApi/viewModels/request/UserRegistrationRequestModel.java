@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class UserRegistrationRequestModel implements Serializable {
     private static final long serialVersionUID = 4424079050889167237L;
     private String firstName, lastName, email, password, username;
-    private AddressDTO address;
+    /*private AddressDTO address;*/
 
     public String getUsername() {
         return username;
@@ -17,13 +17,13 @@ public class UserRegistrationRequestModel implements Serializable {
         this.username = username;
     }
 
-    public AddressDTO getAddress() {
+    /*public AddressDTO getAddress() {
         return address;
     }
 
     public void setAddress(AddressDTO address) {
         this.address = address;
-    }
+    }*/
 
     public String getFirstName() {
         return firstName;
@@ -64,7 +64,7 @@ public class UserRegistrationRequestModel implements Serializable {
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", address=" + address +
+                /*", address=" + address +*/
                 '}';
     }
 }

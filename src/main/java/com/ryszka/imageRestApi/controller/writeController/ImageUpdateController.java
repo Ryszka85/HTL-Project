@@ -26,6 +26,11 @@ public class ImageUpdateController {
         /*updateImageService.setTags(new ImageDTO(updateRequest));*/
     }
 
+    @PostMapping(value = "delete/tags")
+    public void deleteTagsFromImage(@RequestBody SetTagsToImageRequest deleteReq) {
+        modifyImageFromLibraryService.deleteTagsFromImage(new ImageDTO(deleteReq));
+    }
+
     @PostMapping(value = "update/tags")
     public void setImageTags(@RequestBody SetTagsToImageRequest updateRequest) {
         System.out.println(updateRequest);

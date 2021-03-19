@@ -36,6 +36,7 @@ public class ReadTagsService {
     public List<TagDTO> getAllTags() {
         logger.info("Starting [ getAllTags() ] query ...");
         return StreamSupport.stream(tagRepository.findAll().spliterator(), false)
+                .filter(tagEntity -> tagEntity.getImageEntities().size() > 0)
                 .map(tagEntity -> new TagDTO(tagEntity.getTagId(), tagEntity.getTag()))
                 .collect(Collectors.toList());
     }

@@ -7,10 +7,18 @@ import java.io.Serializable;
 public class AddToLibraryRequest implements Serializable {
     private static final long serialVersionUID = 2303659391909273522L;
     private MultipartFile file, galleryFile, downloadFile;
-    private String userId, urlReference, isPublic;
+    private String userId, urlReference, isPublic, tags;
     private int offsetXGallery, offsetYGallery, offsetXDownload, offsetYDownload;
 
     public AddToLibraryRequest() {
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 
     public int getOffsetXGallery() {

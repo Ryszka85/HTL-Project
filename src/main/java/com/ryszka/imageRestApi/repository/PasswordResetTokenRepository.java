@@ -13,4 +13,6 @@ public interface PasswordResetTokenRepository extends CrudRepository<PasswordRes
     Optional<PasswordResetTokenEntity> getByUserEntity(UserEntity userEntity);
 
     Optional<PasswordResetTokenEntity> getByToken(String token);
+
+
 }

@@ -36,4 +36,12 @@ public class TagDAO {
     public Optional<TagEntity> getByTagId(String tagId) {
         return Optional.ofNullable(this.tagRepository.findByTagId(tagId));
     }
+
+    public List<TagEntity> findAllByTag(List<String> tagsList) {
+        return this.tagRepository.findAllByTagIn(tagsList);
+    }
+
+    public void saveAllTags(List<TagEntity> tagEntityList) {
+        this.tagRepository.saveAll(tagEntityList);
+    }
 }

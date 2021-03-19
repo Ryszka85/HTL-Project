@@ -15,7 +15,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("images")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8080", "http://178.112.217.30:8080"}, methods = {RequestMethod.GET, RequestMethod.POST})
+@CrossOrigin(origins = {"88.xxx.xxx.xxx:4200"}, methods = {RequestMethod.GET, RequestMethod.POST})
 public class AddToUserLibraryController {
     private final AddToUserLibraryService libraryStorageService;
     private final FileDownloadService fileService;
