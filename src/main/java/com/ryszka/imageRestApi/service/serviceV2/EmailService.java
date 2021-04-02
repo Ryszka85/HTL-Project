@@ -13,8 +13,8 @@ public class EmailService {
         mailSender.setHost("smtp.gmx.com");
         mailSender.setPort(587);
 
-        mailSender.setUsername("adrian.ryszka@gmx.net");
-        mailSender.setPassword("rastafari");
+        mailSender.setUsername("***");
+        mailSender.setPassword("***");
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
