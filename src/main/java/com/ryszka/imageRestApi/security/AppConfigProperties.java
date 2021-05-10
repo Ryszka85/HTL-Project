@@ -7,6 +7,8 @@ public class AppConfigProperties {
     public static final String PASSWORD = "Admin";
     public static final String GOOGLE_ID = "200318745451-u9viua8onpt25sdmknka7i89uhdrknsd.apps.googleusercontent.com";
     public static final String IMAGE_RECOGNITION_SERVICE_URL = "http://212.186.15.55:8080/getlabels/";
+    public static final String EMAIL_ACCOUNT = "Your Email Account";
+    public static final String EMAIL_ACCOUNT_PASSWORD = "Your Email Password";
 
     public static final String FILE_PATH = "https://storage.googleapis.com/htlimagerestapi.appspot.com/"; //"http://localhost/files/";
     /*public static final String FILE_PATH = "https://storage.googleapis.com/spec-shots.appspot.com/";*/

@@ -91,7 +91,7 @@ public class ValidateImageController {
                 ", total : " + image.getHeight() * image.getWidth());
         final int resReq = image.getWidth() * image.getHeight();
         final int minRes = 1920 * 1080;
-        if ((image.getWidth() < 500 || image.getHeight() < 460) ||
+        if ((image.getWidth() < 1000 || image.getHeight() < 1000) ||
                 resReq < minRes || file.getBytes().length > 4_000_000) {
             return new ValidateImageResponse(ErrorMessages.ILLEGAL_IMAGE_SIZE.getMessage(),
                     400);

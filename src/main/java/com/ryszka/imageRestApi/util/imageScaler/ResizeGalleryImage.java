@@ -84,6 +84,7 @@ public class ResizeGalleryImage implements ImageResizer{
                         .stream()
                         .filter(tag -> tag.getTagName().equals("Orientation"))
                         .map(tag -> tag.getDescription().split(","))
+                        .filter(strings -> strings.length >= 2)
                         .filter(strings -> !strings[0].equals("Top") && !strings[1].equals("left side (Horizontal / normal)"))
                         .count() > 0;
             }
